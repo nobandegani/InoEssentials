@@ -1,10 +1,9 @@
-﻿/* Copyright (c) 2021-2023 by Inoland */
+﻿/* Copyright (c) 2021-2024 by Inoland */
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Subsystems/SS_GI.h"
 
 #include "FL_Extra.generated.h"
 
@@ -27,13 +26,7 @@ public:
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Base64 Decode"), Category = "Ino Extra FL")
 		static void Base64Decode(FString EncodedString, FString &DecodedString, bool &Success);
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set World Context For All Ino GI SS", AdvancedDisplay = "1"), Category = "Ino Extra FL")
-		static void SetWorldContextForAllInoGISS(const UObject* WorldContextObject);
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set World Context For Ino GI SS", AdvancedDisplay = "1"), Category = "Ino Extra FL")
-		static void SetWorldContextForInoGISS(const UObject* WorldContextObject, UInoGISS* InputInoGISS);
-
+	
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Convert TextureRenderTargetCube to TextureCube"), Category = "Ino Extra FL")
 		static UTextureCube* TRTC_TC( UTextureRenderTargetCube* InputRenderTargetCube, UObject* InOuter, FString Name = "Test");
 

@@ -1,4 +1,4 @@
-// Copyright YTSS 2023. All Rights Reserved.
+/* Copyright (c) 2021-2024 by Inoland */
 
 
 #include "InoSubsystem_PluginProxy.h"

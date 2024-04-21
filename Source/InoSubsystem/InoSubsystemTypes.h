@@ -1,4 +1,4 @@
-// Copyright YTSS 2023. All Rights Reserved.
+/* Copyright (c) 2021-2024 by Inoland */
 
 #pragma once
 
@@ -8,5 +8,5 @@ static FPrimaryAssetType const PrimaryAssetType_InoSubsystem = TEXT("InoSubsyste
 
 DECLARE_LOG_CATEGORY_EXTERN(LogInoSubsystem,Log,All);
 DEFINE_LOG_CATEGORY(LogInoSubsystem);
-// #define BPable_Subsystem_PrimaryAssetType FPrimaryAssetType("BPable_Subsystem")
-// #define BPable_Subsystem_PrimaryAssetId(InAssetName) FPrimaryAssetId(BPable_Subsystem_PrimaryAssetType,InAssetName)
+// #define Ino_Subsystem_PrimaryAssetType FPrimaryAssetType("Ino_Subsystem")
+// #define Ino_Subsystem_PrimaryAssetId(InAssetName) FPrimaryAssetId(Ino_Subsystem_PrimaryAssetType,InAssetName)

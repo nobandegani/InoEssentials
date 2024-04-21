@@ -1,4 +1,4 @@
-// Copyright YTSS 2023. All Rights Reserved.
+/* Copyright (c) 2021-2024 by Inoland */
 
 #pragma once
 
@@ -11,7 +11,7 @@
 #include "Ino_LocalPlayerSubsystem.generated.h"
 
 /**
- * UBPable_LocalPlayerSubsystem
+ * Ino_LocalPlayerSubsystem
  * Provides a LocalPlayerSubsystem base class from which SubBlueprint classes can be derived
  */
 UCLASS(Abstract, Blueprintable, BlueprintType)
@@ -76,7 +76,7 @@ protected:
 	 * and any access to the subsystem member variables in this event occurs only on the CDO object,
 	 * not on the actual generated subsystem object.
 	 * You should use this function as a global static function, not as a member function.
-	 * @param Outer - The outer of UBPable_LocalPlayerSubsystem should be a ULocalPlayer
+	 * @param Outer - The outer of UIno_LocalPlayerSubsystem should be a ULocalPlayer
 	 * @return - The return value determines whether to create the Subsystem
 	 */
 	UFUNCTION(BlueprintNativeEvent, DisplayName="ShouldCreateSubsystem")

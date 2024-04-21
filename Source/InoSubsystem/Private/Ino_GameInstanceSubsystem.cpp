@@ -1,4 +1,4 @@
-// Copyright YTSS 2023. All Rights Reserved.
+/* Copyright (c) 2021-2024 by Inoland */
 
 #include "Ino_GameInstanceSubsystem.h"
 #include "InoSubsystem/InoSubsystemTypes.h"
@@ -27,7 +27,7 @@ void UIno_GameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection
 	
 	// World delegation assign
 	
-	// FWorldDelegates::OnStartGameInstance.AddUObject(this, &UBPable_GameInstanceSubsystem::StartGameInstance);
+	// FWorldDelegates::OnStartGameInstance.AddUObject(this, &UIno_GameInstanceSubsystem::StartGameInstance);
 	FWorldDelegates::OnPostWorldInitialization.
 		AddUObject(this, &UIno_GameInstanceSubsystem::PostWorldInitialization);
 	FWorldDelegates::OnWorldBeginTearDown.AddUObject(this,&UIno_GameInstanceSubsystem::WorldBeginTearingDown);

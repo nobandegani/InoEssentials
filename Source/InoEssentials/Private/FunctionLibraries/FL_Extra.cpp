@@ -52,50 +52,6 @@ void UFL_Extra::Base64Decode(FString EncodedString, FString& DecodedString, bool
 	Success = FBase64::Decode(EncodedString, DecodedString);
 }
 
-
-void UFL_Extra::SetWorldContextForAllInoGISS(const UObject* WorldContextObject)
-{
-	if (WorldContextObject == nullptr || !IsValid(WorldContextObject))
-	{
-		return;
-	}
-	if ( WorldContextObject->GetWorld() == nullptr)
-	{
-		return;
-	}
-	
-	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
-	if (GameInstance == nullptr)
-	{
-		return;
-	}
-	
-	TArray<UInoGISS*> GameInstances = GameInstance->GetSubsystemArray<UInoGISS>();
-	for (auto InoGISS : GameInstances)
-	{
-		InoGISS->SetWorldContext(WorldContextObject);
-	}
-}
-
-void UFL_Extra::SetWorldContextForInoGISS(const UObject* WorldContextObject, UInoGISS* InputInoGISS)
-{
-	if (WorldContextObject == nullptr || !IsValid(WorldContextObject))
-	{
-		return;
-	}
-	if ( WorldContextObject->GetWorld() == nullptr)
-	{
-		return;
-	}
-	
-	if (InputInoGISS == nullptr)
-	{
-		return;
-	}
-	
-	InputInoGISS->SetWorldContext(WorldContextObject);
-}
-
 UTextureCube* UFL_Extra::TRTC_TC(UTextureRenderTargetCube* InputRenderTargetCube, UObject* InOuter, FString Name)
 {
 	return InputRenderTargetCube->ConstructTextureCube(InOuter, Name, EObjectFlags::RF_Public);

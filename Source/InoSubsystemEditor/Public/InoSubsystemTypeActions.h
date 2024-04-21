@@ -1,4 +1,4 @@
-﻿// Copyright YTSS 2023. All Rights Reserved.
+﻿/* Copyright (c) 2021-2024 by Inoland */
 
 #pragma once
 
@@ -22,7 +22,7 @@ public:
 	{
 		static const TArray<FText> SubMenus
 		{
-			LOCTEXT("BPableSubsystemClassSubMenu", "Subsystems")
+			LOCTEXT("InoSubsystemClassSubMenu", "Subsystems")
 		};
 		return SubMenus;
 	}

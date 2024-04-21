@@ -1,4 +1,4 @@
-﻿// Copyright YTSS 2023. All Rights Reserved.
+﻿/* Copyright (c) 2021-2024 by Inoland */
 
 #include "InoSubsystemFunctions.h"
 #include "Ino_GameInstanceSubsystem.h"
@@ -11,7 +11,7 @@
 
 void FInoSubsystemFunctions::FindAllPluginsDirectory(TSet<FString>& PluginDirectorys)
 {
-	UE_LOG(LogInoSubsystem, Log, TEXT("Begin to scan BPableSubsystem Asset"))
+	UE_LOG(LogInoSubsystem, Log, TEXT("Begin to scan InoSubsystem Asset"))
 	IPluginManager& PluginManager = IPluginManager::Get();
 
 	auto Plugins = PluginManager.GetEnabledPluginsWithContent();
@@ -22,11 +22,13 @@ void FInoSubsystemFunctions::FindAllPluginsDirectory(TSet<FString>& PluginDirect
 		if (Plugin->GetBaseDir().Contains("Marketplace") || Plugin->GetLoadedFrom() == EPluginLoadedFrom::Project)
 		{
 			PluginNames.Add(Plugin->GetMountedAssetPath());
+			UE_LOG(LogInoSubsystem, Log, TEXT("Plugin %s Path: %s"), *Plugin->GetName(), *Plugin->GetMountedAssetPath())
 		}
 	}
 
 	PluginDirectorys.Add("/Game/");
-	UE_LOG(LogInoSubsystem, Log, TEXT("End of scan BPableSubsystem Asset"))
+	PluginDirectorys.Add("/InoEssentials/");
+	UE_LOG(LogInoSubsystem, Log, TEXT("End of scan InoSubsystem Asset"))
 }
 
 void FInoSubsystemFunctions::LoadSubsystemByPaths(UClass* SubsystemClass, const TSet<FString>& Paths)
@@ -38,7 +40,7 @@ void FInoSubsystemFunctions::LoadSubsystemByPaths(UClass* SubsystemClass, const 
 	if (!IsValid(ObjectLibrary))
 	{
 		UE_LOG(LogInoSubsystem, Warning,
-		       TEXT("Unable to create BPable_Subsystem ObjectLibrary. Cause the SubBlueprint of BPable_... cant be uesd"
+		       TEXT("Unable to create Ino_Subsystem ObjectLibrary. Cause the SubBlueprint of Ino_... cant be uesd"
 		       ));
 		return;
 	}
@@ -51,23 +53,23 @@ void FInoSubsystemFunctions::LoadSubsystemByPaths(UClass* SubsystemClass, const 
 
 void FInoSubsystemFunctions::LoadAllInoSubsystemByPaths(const TSet<FString>& Paths)
 {
-	UE_LOG(LogInoSubsystem, Log, TEXT("Begin to load all of BPableSubsystem Asset"))
+	UE_LOG(LogInoSubsystem, Log, TEXT("Begin to load all of InoSubsystem Asset"))
 	LoadSubsystemByPaths(UIno_GameInstanceSubsystem::StaticClass(), Paths);
 	LoadSubsystemByPaths(UIno_LocalPlayerSubsystem::StaticClass(), Paths);
 	LoadSubsystemByPaths(UIno_WorldSubsystem::StaticClass(), Paths);
 
-	// LoadSubsystemByPaths(UBPable_EngineSubsystem::StaticClass(), Paths);
-	// LoadSubsystemByPaths(UBPable_EditorSubsystem::StaticClass(), Paths);
+	// LoadSubsystemByPaths(UIno_EngineSubsystem::StaticClass(), Paths);
+	// LoadSubsystemByPaths(UIno_EditorSubsystem::StaticClass(), Paths);
 
 	// UAssetManager::Get().
-	// 	ScanPathsForPrimaryAssets(PrimaryAssetType_BPableSubsystem, Paths.Array(),
-	// 	                          UBPable_GameInstanceSubsystem::StaticClass(), true, false, true);
+	// 	ScanPathsForPrimaryAssets(PrimaryAssetType_InoSubsystem, Paths.Array(),
+	// 	                          UIno_GameInstanceSubsystem::StaticClass(), true, false, true);
 	// UAssetManager::Get().
-	// 	ScanPathsForPrimaryAssets(PrimaryAssetType_BPableSubsystem, Paths.Array(),
-	// 	                          UBPable_LocalPlayerSubsystem::StaticClass(), true, false, true);
+	// 	ScanPathsForPrimaryAssets(PrimaryAssetType_InoSubsystem, Paths.Array(),
+	// 	                          UIno_LocalPlayerSubsystem::StaticClass(), true, false, true);
 	// UAssetManager::Get().
-	// 	ScanPathsForPrimaryAssets(PrimaryAssetType_BPableSubsystem, Paths.Array(),
-	// 	                          UBPable_WorldSubsystem::StaticClass(), true, false, true);
+	// 	ScanPathsForPrimaryAssets(PrimaryAssetType_InoSubsystem, Paths.Array(),
+	// 	                          UIno_WorldSubsystem::StaticClass(), true, false, true);
 
-	UE_LOG(LogInoSubsystem, Log, TEXT("End of load All of BPableSubsystem Asset"))
+	UE_LOG(LogInoSubsystem, Log, TEXT("End of load All of InoSubsystem Asset"))
 }

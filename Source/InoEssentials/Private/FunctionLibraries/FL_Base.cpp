@@ -15,8 +15,6 @@
 #include "GameFramework/PlayerController.h"
 #include "Misc/OutputDeviceNull.h"
 
-#include "InoBase/SS_InoBase.h"
-
 UFL_Base::UFL_Base(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -113,7 +111,7 @@ void UFL_Base::InoLog(
 	}
 
 	if (bInoLog || bServerLog)
-	{
+	{/*
 		UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
 		if (GameInstance)
 		{
@@ -122,7 +120,7 @@ void UFL_Base::InoLog(
 			{
 				Inobase->InoLogCalled(Input, ActualType, ActualCategory,   TempObjectName, bInoLog, bServerLog);
 			}
-		}
+		} */
 	}
 }
 

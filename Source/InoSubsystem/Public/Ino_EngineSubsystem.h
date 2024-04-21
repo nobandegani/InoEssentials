@@ -1,4 +1,4 @@
-// Copyright YTSS 2023. All Rights Reserved.
+/* Copyright (c) 2021-2024 by Inoland */
 
 #pragma once
 
@@ -31,7 +31,7 @@ protected:
 	/**
 	 * The event called before this subsystem is created.
 	 * This event is used to determine whether to create the subsystem singleton.
-	 * @param Outer - The outer of UBPable_EditorSubsystem should be a UEngine
+	 * @param Outer - The outer of UIno_EditorSubsystem should be a UEngine
 	 * @return - The return value determines whether to create the Subsystem
 	 */
 	UFUNCTION(BlueprintNativeEvent, DisplayName="ShouldCreateSubsystem")
