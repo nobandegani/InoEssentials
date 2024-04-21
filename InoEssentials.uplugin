@@ -1,0 +1,77 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.8",
+	"EngineVersion": "5.3",
+	"FriendlyName": "Ino Essentials",
+	"Description": "Ino Essentials Plugin",
+	"Category": "Ino Plugins",
+	"CreatedBy": "Inoland Studio",
+	"CreatedByURL": "https://inoland.net",
+	"DocsURL": "https://docs.inoland.net/documentation/ie-welcome/",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/a14799caba6543e1ace0c27eb6c1f887",
+	"SupportURL": "https://discord.gg/4pWBHE7NHE",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "InoEssentials",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Mac",
+				"Android",
+				"Linux"
+			]
+		},
+		{
+			"Name": "InoEditorEssentials",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"AndroidRuntimeSettings"
+			],
+			"PlatformAllowList": [
+				"Win64",
+				"Mac",
+				"Android",
+				"Linux"
+			]
+		},
+		{
+			"Name": "InoSubsystem",
+			"Type": "Runtime",
+			"LoadingPhase": "PreLoadingScreen"
+		},
+		{
+			"Name": "InoSubsystemEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "WebBrowserWidget",
+			"Enabled": true,
+			"Optional": true
+		},
+		{
+			"Name": "JsonBlueprintUtilities",
+			"Enabled": true,
+			"Optional": true
+		},
+		{
+			"Name": "ChunkDownloader",
+			"Enabled": true,
+			"Optional": true
+		},
+		{
+			"Name": "BlueprintFileUtils",
+			"Enabled": true,
+			"Optional": true
+		}
+	]
+}
