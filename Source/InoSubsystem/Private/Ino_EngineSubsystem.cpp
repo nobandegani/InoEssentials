@@ -1,7 +1,7 @@
 // © 2024. All rights reserved by Inoland
 
 #include "Ino_EngineSubsystem.h"
-#include "InoSubsystem/InoSubsystemTypes.h"
+#include "InoSubsystemTypes.h"
 
 bool UIno_EngineSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {

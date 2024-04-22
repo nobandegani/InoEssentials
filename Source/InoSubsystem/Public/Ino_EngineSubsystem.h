@@ -29,8 +29,6 @@ protected:
 	void ReceiveDeinitialize();
 
 	/**
-	 * The event called before this subsystem is created.
-	 * This event is used to determine whether to create the subsystem singleton.
 	 * @param Outer - The outer of UIno_EditorSubsystem should be a UEngine
 	 * @return - The return value determines whether to create the Subsystem
 	 */

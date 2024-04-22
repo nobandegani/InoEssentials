@@ -1,7 +1,7 @@
 /* Copyright (c) 2021-2024 by Inoland */
 
 #include "Ino_GameInstanceSubsystem.h"
-#include "InoSubsystem/InoSubsystemTypes.h"
+#include "InoSubsystemTypes.h"
 
 void UIno_GameInstanceSubsystem::PostWorldInitialization(UWorld* World, const UWorld::InitializationValues IVS)
 {
@@ -25,9 +25,6 @@ void UIno_GameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection
 {
 	check(!bInitialized)
 	
-	// World delegation assign
-	
-	// FWorldDelegates::OnStartGameInstance.AddUObject(this, &UIno_GameInstanceSubsystem::StartGameInstance);
 	FWorldDelegates::OnPostWorldInitialization.
 		AddUObject(this, &UIno_GameInstanceSubsystem::PostWorldInitialization);
 	FWorldDelegates::OnWorldBeginTearDown.AddUObject(this,&UIno_GameInstanceSubsystem::WorldBeginTearingDown);

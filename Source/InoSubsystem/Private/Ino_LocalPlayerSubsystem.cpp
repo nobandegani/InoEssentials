@@ -1,7 +1,7 @@
 /* Copyright (c) 2021-2024 by Inoland */
 
 #include "Ino_LocalPlayerSubsystem.h"
-#include "InoSubsystem/InoSubsystemTypes.h"
+#include "InoSubsystemTypes.h"
 
 void UIno_LocalPlayerSubsystem::PostWorldInitialization(UWorld* World, const UWorld::InitializationValues IVS)
 {
@@ -24,8 +24,6 @@ bool UIno_LocalPlayerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 void UIno_LocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	check(!bInitialized)
-
-	// World delegation assign
 
 	FWorldDelegates::OnStartGameInstance.AddUObject(this, &UIno_LocalPlayerSubsystem::StartGameInstance);
 	FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UIno_LocalPlayerSubsystem::PostWorldInitialization);

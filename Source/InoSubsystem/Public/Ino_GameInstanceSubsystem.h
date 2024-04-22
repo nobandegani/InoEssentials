@@ -9,9 +9,6 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Ino_GameInstanceSubsystem.generated.h"
 
-// class FActivation;
-// class UGameInstance;
-
 /**
  * Ino_GameInstanceSubsystem
  * Provides a GameInstanceSubsystem base class from which SubBlueprint classes can be derived
@@ -53,8 +50,6 @@ public:
 	virtual void WorldBeginTearingDown(UWorld* World) { ReceiveWorldBeginTearingDown(); }
 
 protected:
-	// Blueprint functions Begin
-
 	/**The event called after this subsystem is created.*/
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="Initialize")
 	void ReceiveInitialize();
@@ -72,12 +67,6 @@ protected:
 	void ReceiveWorldBeginTearingDown();
 
 	/**
-	 * This event is called before the subsystem is constructed.
-	 * Used to determine if the subsystem is created.
-	 * Attention! This subsystem had not been constructed at the time this event was executed,
-	 * and any access to the subsystem member variables in this event occurs only on the CDO object,
-	 * not on the actual generated subsystem object.
-	 * You should use this function as a global static function, not as a member function.
 	 * @param Outer - The outer of UIno_LocalPlayerSubsystem should be a UGameInstance
 	 * @return - The return value determines whether to create the Subsystem
 	 */
@@ -88,12 +77,7 @@ public:
 	/**Return Outer of this Subsystem*/
 	UFUNCTION(BlueprintPure, Category="Subsystem|GameInstanceSubsystem", meta=(KeyWords="Get"))
 	UGameInstance* GetGameInstance() const { return Super::GetGameInstance(); }
-
-	// Blueprint functions End
-
 public:
-	// FActivation implementation Begin
-
 	/**
 	 * Activates the object.
 	 * @param bReset - Whether the activation should happen even if IsActive returns true.
@@ -145,15 +129,11 @@ public:
 	FDeactivateSignature OnDeactivated;
 
 protected:
-	/** Default activation status */
 	UPROPERTY(EditAnywhere, Category="Activation")
 	uint8 bActiveDefault:1;
 
 	virtual void ReceiveActivate(bool bReset) override { if (bInitialized) OnActivated.Broadcast(this, bReset); }
 	virtual void ReceiveDeactivate() override { if (bInitialized) OnDeactivated.Broadcast(this); }
-
-	// FActivation implementation End
-
 public:
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 };

@@ -1,7 +1,7 @@
 /* Copyright (c) 2021-2024 by Inoland */
 
 #include "Ino_WorldSubsystem.h"
-#include "InoSubsystem/InoSubsystemTypes.h"
+#include "InoSubsystemTypes.h"
 
 bool UIno_WorldSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {

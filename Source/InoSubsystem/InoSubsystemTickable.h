@@ -22,18 +22,13 @@ private:
 	uint8 bIsTickableWhenPaused:1;
 
 public:
-	// FTickableObjectBase implementation Begin
 	virtual TStatId GetStatId() const override =0;
 	virtual bool IsTickableInEditor() const override final { return false; }
 
 	virtual void Tick(float DeltaSeconds) override =0;
 
-	// FTickableObjectBase implementation End
-
-	// FTickableGameObject implementation Begin
 	virtual bool IsTickable() const override { return bIsTickEnabled; }
 	virtual bool IsTickableWhenPaused() const override { return bIsTickableWhenPaused; }
-	// FTickableGameObject implementation End
 public:
 	virtual void SetTickEnabled(bool const bEnabled) { bIsTickEnabled = bEnabled; }
 	virtual void SetTickableWhenPaused(bool const bTickableWhenPaused) { bIsTickableWhenPaused = bTickableWhenPaused; }

@@ -1,7 +1,7 @@
 ﻿/* Copyright (c) 2021-2024 by Inoland */
 
 #include "Ino_GameInstanceSubsystemTickable.h"
-#include "InoSubsystem/InoSubsystemTypes.h"
+#include "InoSubsystemTypes.h"
 
 void UIno_GameInstanceSubsystemTickable::Tick(float DeltaTime)
 {

@@ -18,7 +18,6 @@
 
 void FInoSubsystemEditorModule::StartupModule()
 {
-	// GetAssetTool
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
 	// Spawn AssetTypeActions
