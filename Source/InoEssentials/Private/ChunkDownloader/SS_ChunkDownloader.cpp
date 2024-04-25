@@ -71,5 +71,5 @@ FInoCdStats UChunkDownloaderSubsystem::GetLoadingStats()
 
 bool UChunkDownloaderSubsystem::IsPlayInEditor()
 {
-	return GetWorld()->IsPlayInEditor();
+	return true;//GetWorld()->IsPlayInEditor();
 }
