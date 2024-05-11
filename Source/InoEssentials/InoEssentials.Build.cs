@@ -17,7 +17,9 @@ public class InoEssentials : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"UMG"
+				"UMG",
+				"Networking", 
+				"Sockets"
 			}
 			);
 		

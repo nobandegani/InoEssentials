@@ -2,6 +2,7 @@
 
 #include "FunctionLibraries/FL_Extra.h"
 
+
 #include "Misc/Base64.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -12,7 +13,8 @@
 #include "Misc/FileHelper.h"
 #include "HAL/PlatformFilemanager.h"
 
-
+#include "HAL/PlatformMisc.h"
+#include "SocketSubsystem.h"
 
 UFL_Extra::UFL_Extra(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -78,4 +80,16 @@ bool UFL_Extra::SaveStringToFile(const FString& InputString, const FString& File
 
 	// Append the string to the file
 	return FFileHelper::SaveStringToFile(InputString, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), Append ? FILEWRITE_Append : FILEWRITE_None);
+}
+
+FString UFL_Extra::GetLocalIP()
+{
+	bool bCanBindAll;
+	TSharedPtr<FInternetAddr> LocalIP = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
+	if (LocalIP.IsValid())
+	{
+		return LocalIP->ToString(false);  // 'false' to get the address without the port number
+	}
+
+	return "Unable to retrieve IP Address";
 }

@@ -35,4 +35,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Save String To File"), Category = "Ino Extra FL")
 	static bool SaveStringToFile(const FString& InputString, const FString& FilePath, const bool Append);
+	
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get local IP address"), Category = "Ino Extra FL")
+    	static FString GetLocalIP();
 };
