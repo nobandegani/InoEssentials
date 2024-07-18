@@ -51,7 +51,7 @@ void UChunkDownloaderSubsystem::Init(FString PlatformName, FString DeploymentNam
 			AsyncTask(Ino_Thread_Normal, [bSuccess, LoadCachedBuild, Callback] ()
 			{
 				Callback.ExecuteIfBound(LoadCachedBuild, bSuccess);
-				UE_LOG(ChunkDownloaderSubsystem, Display, TEXT("Update Build complete, Cached %s, update %s"), LoadCachedBuild, bSuccess);
+				UE_LOG(ChunkDownloaderSubsystem, Display, TEXT("Update Build complete, Cached %d, update %d"), LoadCachedBuild, bSuccess);
 			});
 		};
 		CDRef->UpdateBuild(DeploymentName, ContentBuildId, UpdateCompleteCallback); 
