@@ -9,19 +9,6 @@ public class InoEditorEssentials : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
-		PublicIncludePaths.AddRange(
-			new string[] {
-				string.Format("{0}/Public", ModuleDirectory),
-			}
-		);
-
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				string.Format("{0}/Private", ModuleDirectory),
-			}
-		);
-			
-		
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -30,7 +17,9 @@ public class InoEditorEssentials : ModuleRules
 				"Engine",
 				"EngineSettings",
 				"AndroidRuntimeSettings",
-				"DesktopPlatform"
+				"DesktopPlatform",
+				
+				"InoEssentials"
 				// ... add other public dependencies that you statically link with here ...
 			}
 		);
