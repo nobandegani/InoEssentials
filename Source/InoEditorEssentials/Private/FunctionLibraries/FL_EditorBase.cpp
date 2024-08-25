@@ -83,31 +83,6 @@ bool UFL_EditorBase::GetFilesFromDirectory(const FString& Directory, TArray<FStr
 	return true;
 }
 
-bool UFL_EditorBase::GetFileSize(const FString& FileDirectory, int64& FileSize)
-{
-	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	
-	if (PlatformFile.FileExists(*FileDirectory))
-	{
-		FileSize = PlatformFile.FileSize(*FileDirectory);
-		return true;
-	}
-	return false;
-}
-
-bool UFL_EditorBase::SaveStringToFile(const FString StringToSave, const FString FileName, const FString FileDirectory)
-{
-	FString FilePath = FileDirectory + FileName;
-
-	return FFileHelper::SaveStringToFile(StringToSave, *FilePath);
-}
-
-bool UFL_EditorBase::LoadStringFromFile(const FString FileName, const FString FileDirectory, FString& LoadedString)
-{
-	FString FilePath = FileDirectory + FileName;
-	return FFileHelper::LoadFileToString(LoadedString, *FilePath);
-}
-
 bool UFL_EditorBase::SetStringInEditorConfig(const FString SectionName, const FString KeyName, const FString Value, bool Flush)
 {
 	GConfig->SetString(*SectionName, *KeyName, *Value, GEditorIni);

@@ -17,25 +17,6 @@ struct FInoTest
 };
 
 UENUM(BlueprintType)
-enum class ELogType : uint8
-{
-	Unkown = 0,
-	Info = 1,
-	Warning = 2,
-	Success = 3,
-	Error = 4,
-	Critical = 5,
-};
-
-UENUM(BlueprintType)
-enum class ELogCategory : uint8
-{
-	Base = 0,
-	InoEsseintials = 1,
-	InoOSS = 2,
-};
-
-UENUM(BlueprintType)
 enum class EViewMode : uint8
 {
 	None,

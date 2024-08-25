@@ -69,17 +69,35 @@ bool UFL_Extra::RCC_SetCube(UReflectionCaptureComponent* ReflectionCapture, UTex
 	return true;
 }
 
-bool UFL_Extra::SaveStringToFile(const FString& InputString, const FString& FilePath, const bool Append)
+bool UFL_Extra::LoadStringFromFile(const FString& FilePath, FString& LoadedString)
+{
+	return FFileHelper::LoadFileToString(LoadedString, *FilePath);
+}
+
+bool UFL_Extra::SaveStringToFile(const FString& InString, const FString& InFilePath, const bool Append)
 {
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	FString Directory = FPaths::GetPath(FilePath);
+	FString Directory = FPaths::GetPath(InFilePath);
 	if (!PlatformFile.DirectoryExists(*Directory))
 	{
 		PlatformFile.CreateDirectory(*Directory);
 	}
 
 	// Append the string to the file
-	return FFileHelper::SaveStringToFile(InputString, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), Append ? FILEWRITE_Append : FILEWRITE_None);
+	return FFileHelper::SaveStringToFile(InString, *InFilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), Append ? FILEWRITE_Append : FILEWRITE_None);
+}
+
+bool UFL_Extra::GetFileSize(const FString& FilePath, int64& FileSize)
+{
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	
+	if (!PlatformFile.FileExists(*FilePath))
+	{
+		return false;
+	}
+
+	FileSize = PlatformFile.FileSize(*FilePath);
+	return true;
 }
 
 FString UFL_Extra::GetLocalIP()

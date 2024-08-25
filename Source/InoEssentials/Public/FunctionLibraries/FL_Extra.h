@@ -33,8 +33,14 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Reflection Capture Component Set Cube"), Category = "Ino Extra FL")
 		static bool RCC_SetCube( UReflectionCaptureComponent* ReflectionCapture, UTextureCube* InputCube);
 
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Load String From File"), Category = "Ino Extra FL")
+		static bool LoadStringFromFile(const FString& FilePath, FString& LoadedString);
+	
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Save String To File"), Category = "Ino Extra FL")
-	static bool SaveStringToFile(const FString& InputString, const FString& FilePath, const bool Append);
+		static bool SaveStringToFile(const FString& InputString, const FString& FilePath, const bool Append);
+	
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get File Size"), Category = "Ino Extra FL")
+		static bool GetFileSize(const FString& FilePath, int64& FileSize);
 	
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get local IP address"), Category = "Ino Extra FL")
     	static FString GetLocalIP();
