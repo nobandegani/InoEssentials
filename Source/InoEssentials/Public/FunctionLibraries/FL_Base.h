@@ -18,7 +18,7 @@
 /**
  * 
  */
-UCLASS(Blueprintable, meta = (DisplayName = "Ino Base FL", Keywords = "base"), Category = "Ino Base FL")
+UCLASS(Blueprintable, meta = (DisplayName = "Ino FL Base", Keywords = "base"), Category = "Ino|FL|Base")
 class UFL_Base : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -26,13 +26,13 @@ class UFL_Base : public UBlueprintFunctionLibrary
 	UFL_Base(const FObjectInitializer& ObjectInitializer);
 
 public:
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Is Editor?", Keywords = "is editor "), Category = "Ino Base FL")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Is Editor?", Keywords = "is editor "), Category = "Ino|FL|Base")
 		static bool IsEditor();
 	
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Environment Variable", Keywords = "Get Environment Variable"), Category = "Ino Base FL")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Environment Variable", Keywords = "Get Environment Variable"), Category = "Ino|FL|Base")
 		static bool GetEnvironmentVariable(FString Env_Variable, FString& Env_Value);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Ino Log", Keywords = "Print, String, Log", WorldContext="WorldContextObject", HidePin = "WorldContextObject", CallableWithoutWorldContext, AdvancedDisplay = "3", GameplayTagFilter = "Ino.Log.", AutoCreateRefTerm = "Type, Category"), Category = "Ino Base FL")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Ino Log", Keywords = "Print, String, Log", WorldContext="WorldContextObject", HidePin = "WorldContextObject", CallableWithoutWorldContext, AdvancedDisplay = "3", GameplayTagFilter = "Ino.Log.", AutoCreateRefTerm = "Type, Category"), Category = "Ino|FL|Base")
 		static void InoLog(
 			const UObject* WorldContextObject,
 			const FString& InString = FString(TEXT("Hello")),
@@ -50,15 +50,15 @@ public:
 			bool bShowTime = false
 			); 
 	
-	UFUNCTION(BlueprintCallable, Category = "Ino Base FL", meta  = (DisplayName = "Get Current ViewMode", Keywords = "get current input mode, input mode, ui mode"))
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Base", meta  = (DisplayName = "Get Current ViewMode", Keywords = "get current input mode, input mode, ui mode"))
 		static EViewMode GetCurrentViewMode(const APlayerController *PlayerController);
 
-	UFUNCTION(BlueprintCallable, Category = "Ino Base FL")
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Base")
 		static void SetClipboard(FString InputString);
 	
-	UFUNCTION(BlueprintCallable, Category = "Ino Base FL")
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Base")
 		static void GetClipboard(FString &OutputString);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Project Version"), Category = "Ino Base FL")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Project Version"), Category = "Ino|FL|Base")
 		static FString GetProjectVersion();
 };

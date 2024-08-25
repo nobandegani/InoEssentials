@@ -36,16 +36,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, CallInEditor,DisplayName="Get Files From Directory", Category = "Ino|Editor|Base")
 		static bool GetFilesFromDirectory(const FString& Directory, TArray<FString>& OutFileList);
-
-	UFUNCTION(BlueprintCallable, CallInEditor,DisplayName="Get File Size", Category = "Ino|Editor|Base")
-		static bool GetFileSize(const FString& FileDirectory, int64& FileSize);
-
-	UFUNCTION(BlueprintCallable, CallInEditor,DisplayName="Save String To File", Category = "Ino|Editor|Base")
-		static bool SaveStringToFile(const FString StringToSave, const FString FileName, const FString FileDirectory);
-
-	UFUNCTION(BlueprintCallable, CallInEditor,DisplayName="Load String From File", Category = "Ino|Editor|Base")
-		static bool LoadStringFromFile(const FString FileName, const FString FileDirectory, FString& LoadedString);
-
+	
 	UFUNCTION(BlueprintCallable, CallInEditor,DisplayName="Set String In Editor Config", Category = "Ino|Editor|Base")
 		static bool SetStringInEditorConfig(const FString SectionName, const FString KeyName, const FString Value, bool Flush);
 
