@@ -44,4 +44,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get local IP address"), Category = "Ino|FL|Extra")
     	static FString GetLocalIP();
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Hash String With MD5"), Category = "Ino|FL|Extra")
+		static FString HashStringWithMD5(const FString& Input);
+
+	
 };

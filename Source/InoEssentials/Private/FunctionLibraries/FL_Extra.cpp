@@ -16,6 +16,8 @@
 #include "HAL/PlatformMisc.h"
 #include "SocketSubsystem.h"
 
+#include "Misc/SecureHash.h"
+
 UFL_Extra::UFL_Extra(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -110,4 +112,27 @@ FString UFL_Extra::GetLocalIP()
 	}
 
 	return "Unable to retrieve IP Address";
+}
+
+FString UFL_Extra::HashStringWithMD5(const FString& Input)
+{
+	// Convert the FString to an ANSI string for hashing
+	FTCHARToUTF8 Convert(*Input);
+	const ANSICHAR* UTF8String = reinterpret_cast<const ANSICHAR*>(Convert.Get());
+
+	// Compute the MD5 hash
+	FMD5 MD5;
+	MD5.Update(reinterpret_cast<const uint8*>(UTF8String), FCStringAnsi::Strlen(UTF8String));
+
+	uint8 Hash[16];
+	MD5.Final(Hash);
+
+	// Convert the hash to a readable hex string
+	FString MD5Hash;
+	for (int32 i = 0; i < 16; i++)
+	{
+		MD5Hash += FString::Printf(TEXT("%02x"), Hash[i]);
+	}
+
+	return MD5Hash;
 }
