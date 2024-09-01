@@ -22,10 +22,22 @@ public:
 	static FString GetMapName(UObject* WorldContextObject, bool RemovePrefix);
 	
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Base64 Encode"), Category = "Ino|FL|Extra")
-		static void Base64Encode(FString InString, FString &EncodedString);
+		static void Base64Encode(const FString& InString, FString &EncodedString);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Base64 Decode"), Category = "Ino|FL|Extra")
-		static void Base64Decode(FString EncodedString, FString &DecodedString, bool &Success);
+		static bool Base64Decode(const FString& EncodedString, FString &DecodedString);
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Base64 Encode Data"), Category = "Ino|FL|Extra")
+	static bool Base64EncodeData(const TArray<uint8>& Data, FString& EncodedData);
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Base64 Decode Data"), Category = "Ino|FL|Extra")
+	static bool Base64DecodeData(const FString& EncodedData, TArray<uint8>& DecodedData);
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Hash MD5"), Category = "Ino|FL|Extra")
+	static FString HashMD5(const FString& StringToHash);
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Hash SHA1"), Category = "Ino|FL|Extra")
+	static FString HashSHA1(const FString& StringToHash);
 	
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Convert TextureRenderTargetCube to TextureCube"), Category = "Ino|FL|Extra")
 		static UTextureCube* TRTC_TC( UTextureRenderTargetCube* InputRenderTargetCube, UObject* InOuter, FString Name = "Test");
@@ -48,5 +60,15 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Hash String With MD5"), Category = "Ino|FL|Extra")
 		static FString HashStringWithMD5(const FString& Input);
 
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Encrypt AES"), Category = "Ino|FL|Extra")
+		static FString EncryptAES(const FString& PlainText, const FString& Key);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Decrypt AES"), Category = "Ino|FL|Extra")
+		static FString DecryptAES(const FString& EncryptedText, const FString& Key);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Encrypt AES"), Category = "Ino|FL|Extra")
+	static FString EncryptSH1(const FString& PlainText, const FString& Key);
+
 	
+
 };

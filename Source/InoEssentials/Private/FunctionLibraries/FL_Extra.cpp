@@ -2,6 +2,8 @@
 
 #include "FunctionLibraries/FL_Extra.h"
 
+#include <string>
+
 
 #include "Misc/Base64.h"
 
@@ -46,14 +48,52 @@ FString UFL_Extra::GetMapName(UObject* WorldContextObject, bool RemovePrefix)
 	return MapName;
 }
 
-void UFL_Extra::Base64Encode(FString InString, FString &EncodedString)
+void UFL_Extra::Base64Encode(const FString& InString, FString &EncodedString)
 {
 	EncodedString = FBase64::Encode(InString);
 }
 
-void UFL_Extra::Base64Decode(FString EncodedString, FString& DecodedString, bool& Success)
+bool UFL_Extra::Base64Decode(const FString& EncodedString, FString& DecodedString)
 {
-	Success = FBase64::Decode(EncodedString, DecodedString);
+	return FBase64::Decode(EncodedString, DecodedString);
+}
+
+bool UFL_Extra::Base64EncodeData(const TArray<uint8>& Data, FString& EncodedData)
+{
+	if (Data.Num() > 0)
+	{
+		EncodedData = FBase64::Encode(Data);
+		return true;
+	}
+
+	EncodedData = FString();
+	return false;
+}
+
+bool UFL_Extra::Base64DecodeData(const FString& EncodedData, TArray<uint8>& DecodedData)
+{
+	return FBase64::Decode(EncodedData, DecodedData);
+}
+
+FString UFL_Extra::HashMD5(const FString& StringToHash)
+{
+	return FMD5::HashAnsiString(*StringToHash);
+}
+
+FString UFL_Extra::HashSHA1(const FString& StringToHash)
+{
+	FSHA1 Sha1Gen;
+
+	Sha1Gen.Update((unsigned char*)TCHAR_TO_ANSI(*StringToHash), FCString::Strlen(*StringToHash));
+	Sha1Gen.Final();
+
+	FString Sha1String;
+	for (int32 i = 0; i < 20; i++)
+	{
+		Sha1String += FString::Printf(TEXT("%02x"), Sha1Gen.m_digest[i]);
+	}
+
+	return Sha1String;
 }
 
 UTextureCube* UFL_Extra::TRTC_TC(UTextureRenderTargetCube* InputRenderTargetCube, UObject* InOuter, FString Name)
@@ -135,4 +175,99 @@ FString UFL_Extra::HashStringWithMD5(const FString& Input)
 	}
 
 	return MD5Hash;
+}
+
+FString UFL_Extra::EncryptAES(const FString& PlainText, const FString& Key)
+{
+	// Check if the key is exactly 32 bytes
+	if (Key.Len() != 32)
+	{
+		return TEXT("Key should be 32 bytes");
+	}
+
+	// Convert FString to TArray<uint8> for Content
+	TArray<uint8> ContentBytes;
+	ContentBytes.Append(reinterpret_cast<const uint8*>(*PlainText), PlainText.Len());
+
+	// Add padding to ensure the size is a multiple of 16 bytes
+	int32 PaddingSize = 16 - (ContentBytes.Num() % 16);
+	ContentBytes.AddZeroed(PaddingSize);
+
+	// Convert FString to TArray<uint8> for Key
+	TArray<uint8> KeyBytes;
+	KeyBytes.Append(reinterpret_cast<const uint8*>(*Key), Key.Len());
+
+	// Prepare an array to hold the encrypted data
+	TArray<uint8> EncryptedBytes;
+	EncryptedBytes.SetNum(ContentBytes.Num());
+
+	// Encrypt the data
+	FAES::EncryptData(EncryptedBytes.GetData(), ContentBytes.Num(), KeyBytes.GetData(), KeyBytes.Num());
+
+	// Convert TArray<uint8> back to FString (Base64 encoding is common for binary data)
+	FString EncryptedString = FBase64::Encode(EncryptedBytes);
+
+	return EncryptedString;
+}
+
+FString UFL_Extra::DecryptAES(const FString& EncryptedText, const FString& Key)
+{
+	// Check if the key is exactly 32 bytes
+	if (Key.Len() != 32)
+	{
+		return TEXT("Key should be 32 bytes");
+	}
+
+	// Convert the FString (Base64 encoded) to TArray<uint8>
+	TArray<uint8> EncryptedBytes;
+	FBase64::Decode(EncryptedText, EncryptedBytes);
+
+	// Convert FString to TArray<uint8> for Key
+	TArray<uint8> KeyBytes;
+	KeyBytes.Append(reinterpret_cast<const uint8*>(*Key), Key.Len());
+
+	// Decrypt the data
+	FAES::DecryptData(EncryptedBytes.GetData(), EncryptedBytes.Num(), KeyBytes.GetData(), KeyBytes.Num());
+
+	// Remove padding (remove trailing zeros)
+	int32 ActualDataSize = EncryptedBytes.Num();
+	while (ActualDataSize > 0 && EncryptedBytes[ActualDataSize - 1] == 0)
+	{
+		--ActualDataSize;
+	}
+
+	// Convert decrypted TArray<uint8> back to FString
+	FString DecryptedString = FString(reinterpret_cast<const char*>(EncryptedBytes.GetData()), ActualDataSize);
+
+	return DecryptedString;
+}
+
+FString UFL_Extra::EncryptSH1(const FString& PlainText, const FString& Key)
+{
+	// Convert the input string to an array of bytes (TArray<uint8>)
+	FTCHARToUTF8 Convert(*PlainText);
+	const uint8* Data = reinterpret_cast<const uint8*>(Convert.Get());
+	int32 Length = Convert.Length();
+
+	// Initialize an FSHA1 object
+	FSHA1 Sha1;
+
+	// Update the SHA-1 object with the data
+	Sha1.Update(Data, Length);
+
+	// Finalize the hash computation
+	Sha1.Final();
+
+	// Retrieve the hash as a byte array
+	uint8 Hash[FSHA1::DigestSize];
+	Sha1.GetHash(Hash);
+
+	// Convert the byte array to a hexadecimal string
+	FString HashString;
+	for (int32 i = 0; i < FSHA1::DigestSize; i++)
+	{
+		HashString += FString::Printf(TEXT("%02x"), Hash[i]);
+	}
+
+	return HashString;
 }
