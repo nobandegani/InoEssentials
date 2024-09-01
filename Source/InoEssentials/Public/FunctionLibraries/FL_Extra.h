@@ -56,19 +56,13 @@ public:
 	
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get local IP address"), Category = "Ino|FL|Extra")
     	static FString GetLocalIP();
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Hash String With MD5"), Category = "Ino|FL|Extra")
-		static FString HashStringWithMD5(const FString& Input);
-
+	
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Encrypt AES"), Category = "Ino|FL|Extra")
 		static FString EncryptAES(const FString& PlainText, const FString& Key);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Decrypt AES"), Category = "Ino|FL|Extra")
 		static FString DecryptAES(const FString& EncryptedText, const FString& Key);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Encrypt AES"), Category = "Ino|FL|Extra")
-	static FString EncryptSH1(const FString& PlainText, const FString& Key);
 
-	
 
 };

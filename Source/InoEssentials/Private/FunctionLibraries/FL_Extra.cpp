@@ -154,29 +154,6 @@ FString UFL_Extra::GetLocalIP()
 	return "Unable to retrieve IP Address";
 }
 
-FString UFL_Extra::HashStringWithMD5(const FString& Input)
-{
-	// Convert the FString to an ANSI string for hashing
-	FTCHARToUTF8 Convert(*Input);
-	const ANSICHAR* UTF8String = reinterpret_cast<const ANSICHAR*>(Convert.Get());
-
-	// Compute the MD5 hash
-	FMD5 MD5;
-	MD5.Update(reinterpret_cast<const uint8*>(UTF8String), FCStringAnsi::Strlen(UTF8String));
-
-	uint8 Hash[16];
-	MD5.Final(Hash);
-
-	// Convert the hash to a readable hex string
-	FString MD5Hash;
-	for (int32 i = 0; i < 16; i++)
-	{
-		MD5Hash += FString::Printf(TEXT("%02x"), Hash[i]);
-	}
-
-	return MD5Hash;
-}
-
 FString UFL_Extra::EncryptAES(const FString& PlainText, const FString& Key)
 {
 	// Check if the key is exactly 32 bytes
@@ -240,34 +217,4 @@ FString UFL_Extra::DecryptAES(const FString& EncryptedText, const FString& Key)
 	FString DecryptedString = FString(reinterpret_cast<const char*>(EncryptedBytes.GetData()), ActualDataSize);
 
 	return DecryptedString;
-}
-
-FString UFL_Extra::EncryptSH1(const FString& PlainText, const FString& Key)
-{
-	// Convert the input string to an array of bytes (TArray<uint8>)
-	FTCHARToUTF8 Convert(*PlainText);
-	const uint8* Data = reinterpret_cast<const uint8*>(Convert.Get());
-	int32 Length = Convert.Length();
-
-	// Initialize an FSHA1 object
-	FSHA1 Sha1;
-
-	// Update the SHA-1 object with the data
-	Sha1.Update(Data, Length);
-
-	// Finalize the hash computation
-	Sha1.Final();
-
-	// Retrieve the hash as a byte array
-	uint8 Hash[FSHA1::DigestSize];
-	Sha1.GetHash(Hash);
-
-	// Convert the byte array to a hexadecimal string
-	FString HashString;
-	for (int32 i = 0; i < FSHA1::DigestSize; i++)
-	{
-		HashString += FString::Printf(TEXT("%02x"), Hash[i]);
-	}
-
-	return HashString;
 }
