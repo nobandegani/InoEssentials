@@ -62,7 +62,4 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Decrypt AES"), Category = "Ino|FL|Extra")
 		static FString DecryptAES(const FString& EncryptedText, const FString& Key);
-
-
-
 };
