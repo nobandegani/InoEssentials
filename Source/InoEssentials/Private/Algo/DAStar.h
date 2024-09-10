@@ -15,13 +15,15 @@ namespace AStar
     struct Vec2i
     {
         int x, y;
-        
-        bool operator == (const Vec2i& coordinates_) const
-        {
+
+        // Define the operator==
+        bool operator==(const Vec2i& coordinates_) const {
             return (x == coordinates_.x && y == coordinates_.y);
         }
-        friend Vec2i operator + (const AStar::Vec2i& left_, const AStar::Vec2i& right_) {
-            return{ left_.x + right_.x, left_.y + right_.y };
+    
+        // Define the operator+
+        friend Vec2i operator+(const Vec2i& left_, const Vec2i& right_) {
+            return { left_.x + right_.x, left_.y + right_.y };
         }
     };
 
