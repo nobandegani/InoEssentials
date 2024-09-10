@@ -11,6 +11,7 @@
 
 #include "Misc/ConfigCacheIni.h"
 
+#include "UObject/UnrealType.h"
 
 #include "GameFramework/PlayerController.h"
 #include "Misc/OutputDeviceNull.h"
@@ -171,4 +172,26 @@ FString UFL_Base::GetProjectVersion()
 		GGameIni
 	);
 	return AppVersion;
+}
+
+bool UFL_Base::CallBlueprintFunctionByName(UObject* TargetObject, const FName& FunctionName)
+{
+	if (!TargetObject)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TargetObject is null"));
+		return false;
+	}
+
+	UFunction* Function = TargetObject->FindFunction(FunctionName);
+
+	if (Function)
+	{
+		TargetObject->ProcessEvent(Function, nullptr);
+		return true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Function %s not found on object %s"), *FunctionName.ToString(), *TargetObject->GetName());
+		return false;
+	}
 }

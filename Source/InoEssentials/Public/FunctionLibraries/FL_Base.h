@@ -61,4 +61,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Project Version"), Category = "Ino|FL|Base")
 		static FString GetProjectVersion();
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Call Blueprint Function By Name"), Category = "Ino|FL|Base")
+	static bool CallBlueprintFunctionByName(UObject* TargetObject, const FName& FunctionName);
 };
