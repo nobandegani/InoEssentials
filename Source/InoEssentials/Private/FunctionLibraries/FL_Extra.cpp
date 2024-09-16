@@ -218,3 +218,31 @@ FString UFL_Extra::DecryptAES(const FString& EncryptedText, const FString& Key)
 
 	return DecryptedString;
 }
+
+float UFL_Extra::GetTimelineStartTime(float MaxTime, float offset)
+{
+	if (MaxTime <= 0.0f)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("MaxTime must be greater than zero."));
+		return 0.0f;
+	}
+
+	FDateTime UtcNow = FDateTime::UtcNow();
+
+	int64 UnixTimestamp = UtcNow.ToUnixTimestamp();
+
+	int32 Milliseconds = UtcNow.GetMillisecond();
+
+	double TotalSeconds = static_cast<double>(UnixTimestamp) + (Milliseconds / 1000.0);
+
+	double OffsetTotalSeconds = (TotalSeconds+offset) > 60 ? (TotalSeconds-offset) : (TotalSeconds+offset);
+
+	double StartingTime = FMath::Fmod(OffsetTotalSeconds, static_cast<double>(MaxTime));
+
+	if (StartingTime < 0.0)
+	{
+		StartingTime += static_cast<double>(MaxTime);
+	}
+
+	return static_cast<float>(StartingTime);
+}
