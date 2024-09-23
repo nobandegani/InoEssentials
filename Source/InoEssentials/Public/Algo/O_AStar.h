@@ -16,23 +16,6 @@ enum class EGroundDirection : uint8 {
 	Octagonal = 2
 };
 
-//FVector2D
-USTRUCT(BlueprintType, Category = "Vec2i")
-struct FVec2i
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Vec2i")
-		int X;
-
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Vec2i")
-		int Y;
-	
-	FVec2i()
-	{}
-};
-
-
 UCLASS(Blueprintable, BlueprintType, meta = (DisplayName = "A* Algorithm", Keywords = "A*, Algorithm") , Category = "A* Algorithm")
 class INOESSENTIALS_API UAStar : public UObject
 {
@@ -58,14 +41,14 @@ public:
 		void SetHeuristic(EGroundDirection HeuristicMode = EGroundDirection::Euclidean);
 	
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Add Collisions", Keywords = "") , Category = "A* Algorithm")
-		void AddCollisions(TArray<FVec2i> Collisions, bool bClearCollisions = true);
+		void AddCollisions(TArray<FVector2D> Collisions, bool bClearCollisions = true);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Remove Collisions", Keywords = "") , Category = "A* Algorithm")
-		void RemoveCollisions(TArray<FVec2i> Collisions);
+		void RemoveCollisions(TArray<FVector2D> Collisions);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Clear Collisions", Keywords = "") , Category = "A* Algorithm")
 		void ClearCollisions();
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Find Path", Keywords = "") , Category = "A* Algorithm")
-		void FindPath(FVec2i Source, FVec2i Destination, TArray<FVec2i>& Path);
+		void FindPath(FVector2D Source, FVector2D Destination, TArray<FVector2D>& Path);
 };

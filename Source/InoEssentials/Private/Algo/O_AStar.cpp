@@ -34,7 +34,7 @@ void UAStar::SetDiagonalMovement(bool IsDiagonal)
 	generator.setDiagonalMovement(IsDiagonal);
 }
 
-void UAStar::AddCollisions(TArray<FVec2i> Collisions, bool bClearCollisions)
+void UAStar::AddCollisions(TArray<FVector2D> Collisions, bool bClearCollisions)
 {
 	if (bClearCollisions)
 	{
@@ -48,8 +48,12 @@ void UAStar::AddCollisions(TArray<FVec2i> Collisions, bool bClearCollisions)
 	}
 }
 
-void UAStar::RemoveCollisions(TArray<FVec2i> Collisions)
+void UAStar::RemoveCollisions(TArray<FVector2D> Collisions)
 {
+	for (auto& ICollision : Collisions)
+	{
+		generator.removeCollision( AStar::Vec2i(ICollision.X, ICollision.Y) );
+	};
 }
 
 void UAStar::ClearCollisions()
@@ -57,11 +61,11 @@ void UAStar::ClearCollisions()
 	generator.clearCollisions();
 }
 
-void UAStar::FindPath(FVec2i Source, FVec2i Destination, TArray<FVec2i>& Path)
+void UAStar::FindPath(FVector2D Source, FVector2D Destination, TArray<FVector2D>& Path)
 {
-	auto TempPath = generator.findPath({Source.X, Source.Y}, {Destination.X, Destination.Y});
+	auto TempPath = generator.findPath(AStar::Vec2i(Source.X, Source.Y), AStar::Vec2i(Destination.X, Destination.Y));
 	for(auto& Coordinate : TempPath) {
-		FVec2i TempCoord;
+		FVector2D TempCoord;
 		TempCoord.X = Coordinate.x;
 		TempCoord.Y = Coordinate.y;
 		Path.Add(TempCoord);
