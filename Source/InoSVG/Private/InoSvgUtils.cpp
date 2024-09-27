@@ -454,6 +454,7 @@ void UInoSvgUtils::RemoveSameForwardFromSimilarPoints(
 	const TMap<FVector2D, FMazeSimilarPoints>& InSimilarPoints,
 	TMap<FVector2D, FMazeSimilarPoints>& OutSimilarPoints)
 {
+	//#TODO should update
 	for (auto& SimilarPoint : InSimilarPoints)
 	{
 		if (SimilarPoint.Value.array.Num() != 2)
@@ -478,6 +479,7 @@ void UInoSvgUtils::RemoveSameForwardFromSimilarPoints(
 void UInoSvgUtils::FindMazeNeighbourPoints(const TArray<FMazeSpline> MazeSplines,
 	const TMap<FVector2D, FMazeSimilarPoints>& InSimilarPoints, TArray<FMazeNeighbourPoint>& OutNeighbourPoints)
 {
+	//#TODO should update
 	for (auto& SimilarPoint : InSimilarPoints)
 	{
 		FMazeNeighbourPoint NeighbourPoint;

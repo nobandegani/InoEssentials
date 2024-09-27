@@ -6,6 +6,17 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "InoSvgUtils.generated.h"
 
+UENUM(BlueprintType)  // This makes the enum accessible in Blueprints
+enum class ENeighbourType : uint8  // Enum class with underlying type as uint8
+{
+	Wall,
+	MiddleWall,
+	CornerColumn0,
+	CornerColumn1,
+	CornerColumn2,
+	CornerColumn3,
+	CornerColumn4
+};
 
 USTRUCT(BlueprintType)
 struct FLine
@@ -75,6 +86,9 @@ struct FMazeNeighbourPoint
 
 	UPROPERTY(BlueprintReadWrite)
 	int NeighbourCount;
+
+	UPROPERTY(BlueprintReadWrite)
+	ENeighbourType NeighbourType;
 	
 	UPROPERTY(BlueprintReadWrite)
 	FVector2D ForwardVector;
@@ -82,7 +96,7 @@ struct FMazeNeighbourPoint
 	UPROPERTY(BlueprintReadWrite)
 	float RotationZ;
 	
-	FMazeNeighbourPoint(): Location(0,0), NeighbourCount(0), ForwardVector(0,0), RotationZ(0)
+	FMazeNeighbourPoint(): Location(0, 0), NeighbourCount(0), NeighbourType(ENeighbourType::Wall), ForwardVector(0, 0), RotationZ(0)
 	{
 	}
 };
