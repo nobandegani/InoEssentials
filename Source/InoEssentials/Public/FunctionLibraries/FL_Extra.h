@@ -65,4 +65,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "GetTimelineStartTime"), Category = "Ino|FL|Extra")
 		static float GetTimelineStartTime(float MaxTime, float offset);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
+	static TArray<uint8> StringToData(const FString& InputString);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
+	static FString DataToString(const TArray<uint8>& InputData);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
+	static bool CompressDataWithOodle(const TArray<uint8>& InUncompressedData, int32& OutUnCompressedSize, TArray<uint8>& OutCompressedData);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
+	static bool DecompressDataWithOodle(const TArray<uint8>& InCompressedData, const int32& InUnCompressedSize, TArray<uint8>& OutUncompressedData);
 };

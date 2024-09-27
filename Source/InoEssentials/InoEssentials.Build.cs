@@ -19,7 +19,8 @@ public class InoEssentials : ModuleRules
 				"SlateCore",
 				"UMG",
 				"Networking", 
-				"Sockets"
+				"Sockets",
+				"OodleDataCompression"
 			}
 			);
 		

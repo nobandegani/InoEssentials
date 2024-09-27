@@ -4,7 +4,6 @@
 
 #include <string>
 
-
 #include "Misc/Base64.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -19,6 +18,11 @@
 #include "SocketSubsystem.h"
 
 #include "Misc/SecureHash.h"
+
+#include "Serialization/MemoryReader.h"
+#include "Serialization/MemoryWriter.h"
+#include "Compression/OodleDataCompression.h"
+#include "Compression/OodleDataCompressionUtil.h"
 
 UFL_Extra::UFL_Extra(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -245,4 +249,118 @@ float UFL_Extra::GetTimelineStartTime(float MaxTime, float offset)
 	}
 
 	return static_cast<float>(StartingTime);
+}
+
+TArray<uint8> UFL_Extra::StringToData(const FString& InputString)
+{
+	TArray<uint8> OutputData;
+	FMemoryWriter MemoryWriter(OutputData, true);
+        
+	// Write the length of the string first
+	int32 StringLength = InputString.Len();
+	MemoryWriter << StringLength;
+        
+	// Then write the string data
+	MemoryWriter.Serialize(const_cast<TCHAR*>(InputString.GetCharArray().GetData()), StringLength * sizeof(TCHAR));
+        
+	return OutputData;
+}
+
+FString UFL_Extra::DataToString(const TArray<uint8>& InputData)
+{
+	FString OutputString;
+	FMemoryReader MemoryReader(InputData, true);
+        
+	// Read the length of the string first
+	int32 StringLength;
+	MemoryReader << StringLength;
+        
+	// Then read the string data
+	OutputString.GetCharArray().SetNum(StringLength + 1); // +1 for null terminator
+	MemoryReader.Serialize(OutputString.GetCharArray().GetData(), StringLength * sizeof(TCHAR));
+        
+	return OutputString;
+}
+
+bool UFL_Extra::CompressDataWithOodle(const TArray<uint8>& InUncompressedData, int32& OutUnCompressedSize,
+	TArray<uint8>& OutCompressedData)
+{
+	TArray<uint8> CompressedData;
+
+	// Log the start of the compression process
+	UE_LOG(LogTemp, Log, TEXT("Starting compression with Oodle..."));
+	
+	// Log the input size
+	UE_LOG(LogTemp, Log, TEXT("Input Uncompressed Data Size: %d"), InUncompressedData.Num());
+
+	
+	if (InUncompressedData.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to compress: Input data is empty."));
+		return false;
+	}
+
+	FOodleDataCompression::ECompressor OodleCompressor = FOodleDataCompression::ECompressor::Kraken;
+	FOodleDataCompression::ECompressionLevel CompressionLevel = FOodleDataCompression::ECompressionLevel::Normal;
+
+	UE_LOG(LogTemp, Log, TEXT("Compressor: %d, Compression Level: %d"), static_cast<int32>(OodleCompressor), static_cast<int32>(CompressionLevel));
+	
+	int32 MaxCompressedSize = FOodleDataCompression::GetMaximumCompressedSize(InUncompressedData.Num());
+	MaxCompressedSize += MaxCompressedSize / 10;
+	CompressedData.SetNumUninitialized(MaxCompressedSize);
+
+	UE_LOG(LogTemp, Log, TEXT("Max Compressed Data Size: %d"), MaxCompressedSize);
+	
+	int32 CompressedSize = FOodleDataCompression::Compress(
+	CompressedData.GetData(),
+	MaxCompressedSize,
+	InUncompressedData.GetData(),
+	InUncompressedData.Num(),
+	OodleCompressor,
+	CompressionLevel
+	);
+
+	UE_LOG(LogTemp, Log, TEXT("Compressed Size: %d"), CompressedSize);
+	
+	if (CompressedSize > 0)
+	{
+		CompressedData.SetNum(CompressedSize);
+		OutUnCompressedSize = InUncompressedData.Num();
+		OutCompressedData = CompressedData;
+
+		UE_LOG(LogTemp, Log, TEXT("Compression successful!"));
+		return true;
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("Compression failed! CompressedSize returned as 0 or less."));
+	CompressedData.Empty();
+	return false;
+}
+
+bool UFL_Extra::DecompressDataWithOodle(const TArray<uint8>& InCompressedData, const int32& InUnCompressedSize,
+	TArray<uint8>& OutUncompressedData)
+{
+	TArray<uint8> DecompressedData;
+
+	if (InCompressedData.Num() == 0 || InUnCompressedSize <= 0)
+	{
+		return false;
+	}
+	
+	DecompressedData.SetNumUninitialized(InUnCompressedSize);
+	
+	bool bSuccess = FOodleDataCompression::Decompress(
+		DecompressedData.GetData(),              // Output buffer for decompressed data
+		InUnCompressedSize,                        // Size of the output buffer
+		InCompressedData.GetData(),                // Input buffer (compressed data)
+		InCompressedData.Num()                    // Size of the input buffer
+	);
+	
+	if (!bSuccess)
+	{
+		DecompressedData.Empty();
+	};
+	
+	OutUncompressedData = DecompressedData;
+	return bSuccess;
 }
