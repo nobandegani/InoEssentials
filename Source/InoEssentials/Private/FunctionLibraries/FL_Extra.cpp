@@ -282,8 +282,13 @@ FString UFL_Extra::DataToString(const TArray<uint8>& InputData)
 	return OutputString;
 }
 
-bool UFL_Extra::CompressDataWithOodle(const TArray<uint8>& InUncompressedData, int32& OutUnCompressedSize,
-	TArray<uint8>& OutCompressedData)
+bool UFL_Extra::CompressDataWithOodle(
+	const TArray<uint8>& InUncompressedData,
+	EInoCompressor InCompressor,
+	EInoCompressionLevel InCompressionLevel,
+	int32& OutUnCompressedSize,
+	TArray<uint8>& OutCompressedData
+	)
 {
 	TArray<uint8> CompressedData;
 
@@ -300,13 +305,13 @@ bool UFL_Extra::CompressDataWithOodle(const TArray<uint8>& InUncompressedData, i
 		return false;
 	}
 
-	FOodleDataCompression::ECompressor OodleCompressor = FOodleDataCompression::ECompressor::Kraken;
-	FOodleDataCompression::ECompressionLevel CompressionLevel = FOodleDataCompression::ECompressionLevel::Normal;
+	FOodleDataCompression::ECompressor OodleCompressor = static_cast<FOodleDataCompression::ECompressor>(static_cast<int32>(InCompressor));
+	FOodleDataCompression::ECompressionLevel CompressionLevel = static_cast<FOodleDataCompression::ECompressionLevel>((static_cast<int32>(InCompressionLevel) -4));
 
 	UE_LOG(LogTemp, Log, TEXT("Compressor: %d, Compression Level: %d"), static_cast<int32>(OodleCompressor), static_cast<int32>(CompressionLevel));
 	
 	int32 MaxCompressedSize = FOodleDataCompression::GetMaximumCompressedSize(InUncompressedData.Num());
-	MaxCompressedSize += MaxCompressedSize / 10;
+	MaxCompressedSize += MaxCompressedSize / 2;
 	CompressedData.SetNumUninitialized(MaxCompressedSize);
 
 	UE_LOG(LogTemp, Log, TEXT("Max Compressed Data Size: %d"), MaxCompressedSize);

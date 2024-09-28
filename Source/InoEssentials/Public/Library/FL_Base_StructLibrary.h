@@ -4,18 +4,6 @@
 
 #include "FL_Base_StructLibrary.generated.h"
 
-USTRUCT(BlueprintType)
-struct FInoTest
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(BlueprintReadWrite, DisplayName = "Audible Distance", Category = "3D Properties")
-	int32 audibleDistance = 2700;
-	
-	FInoTest ()
-	{}
-};
-
 UENUM(BlueprintType)
 enum class EViewMode : uint8
 {
@@ -23,4 +11,32 @@ enum class EViewMode : uint8
 	GameAndUI,
 	UIOnly,
 	GameOnly,
+};
+
+UENUM(BlueprintType)
+enum class EInoCompressor : uint8
+{
+	NotSet = 0,
+	Selkie = 1,
+	Mermaid = 2,
+	Kraken  = 3,
+	Leviathan = 4
+};
+
+UENUM(BlueprintType)
+enum class EInoCompressionLevel : uint8
+{
+	HyperFast4 = 0,
+	HyperFast3 = 1,
+	HyperFast2 = 2,
+	HyperFast1 = 3,
+	None = 4,
+	SuperFast = 5,
+	VeryFast = 6,
+	Fast = 7,
+	Normal = 8,
+	Optimal1 = 9,
+	Optimal2 = 10,
+	Optimal3 = 11,
+	Optimal4 = 12, // if another added update CompressionLevelNameMap
 };
