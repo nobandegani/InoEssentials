@@ -23,6 +23,7 @@
 #include "Serialization/MemoryWriter.h"
 #include "Compression/OodleDataCompression.h"
 #include "Compression/OodleDataCompressionUtil.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 UFL_Extra::UFL_Extra(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -98,6 +99,11 @@ FString UFL_Extra::HashSHA1(const FString& StringToHash)
 	}
 
 	return Sha1String;
+}
+
+UTexture2D* UFL_Extra::TRT2D_T2D(UTextureRenderTarget2D* InputRenderTarget2D, UObject* InOuter, FString Name)
+{
+	return InputRenderTarget2D->ConstructTexture2D(InOuter, Name, EObjectFlags::RF_Public);
 }
 
 UTextureCube* UFL_Extra::TRTC_TC(UTextureRenderTargetCube* InputRenderTargetCube, UObject* InOuter, FString Name)

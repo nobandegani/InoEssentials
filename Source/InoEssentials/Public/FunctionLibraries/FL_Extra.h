@@ -38,6 +38,9 @@ public:
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Hash SHA1"), Category = "Ino|FL|Extra")
 	static FString HashSHA1(const FString& StringToHash);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Convert TextureRenderTarget2D to Texture2D"), Category = "Ino|FL|Extra")
+	static UTexture2D* TRT2D_T2D( UTextureRenderTarget2D* InputRenderTarget2D, UObject* InOuter, FString Name = "Test");
 	
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Convert TextureRenderTargetCube to TextureCube"), Category = "Ino|FL|Extra")
 		static UTextureCube* TRTC_TC( UTextureRenderTargetCube* InputRenderTargetCube, UObject* InOuter, FString Name = "Test");
