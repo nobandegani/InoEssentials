@@ -16,6 +16,8 @@
 #include "GameFramework/PlayerController.h"
 #include "Misc/OutputDeviceNull.h"
 
+DEFINE_LOG_CATEGORY(InoLogCat);
+
 UFL_Base::UFL_Base(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -38,90 +40,104 @@ bool UFL_Base::GetEnvironmentVariable(FString Env_Variable, FString& Env_Value)
 }
 
 void UFL_Base::InoLog(
-			const UObject* WorldContextObject,
-			const FString& Input,
-			float Duration,
-			const FGameplayTag& Type,
-			const FGameplayTag& Category,
-			bool bScreenPrint,
-			bool bOutputPtint,
-			bool bInoLog,
-			bool bServerLog,
-			FLinearColor CustomColor,
-			const FString& key,
-			bool bShowObjectName,
-			bool bShowCategory,
-			bool bShowTime
+	const UObject* WorldContextObject,
+	const FString& InString,
+
+	const EInoLogType Type,
+	const FGameplayTag& Category,
+
+	float Duration,
+	bool bPrintToScreen,
+	bool bPrintToLog,
+	const FName Key,
+				
+	FLinearColor CustomColor,
+				
+	bool bAddTime
 			)
 {
-	FGameplayTag ActualType = Type.IsValid() ? Type : FGameplayTag::RequestGameplayTag(InoLogTypes::Unkown.GetTag().GetTagName());
-	FGameplayTag ActualCategory = Category.IsValid() ? Category : FGameplayTag::RequestGameplayTag(InoLogCategory::Unkown.GetTag().GetTagName());
-
-	//color system
-	FLinearColor TempColor;
-	
+	FLinearColor TypeColor;
 	if (CustomColor == FLinearColor(1.0, 1.0, 1.0))
 	{
-		if (ActualType == InoLogTypes::Critital)
+		switch (Type)
 		{
-			TempColor = FLinearColor(1, 0, 0.711481,1);
-		}else if (ActualType == InoLogTypes::Error)
-		{
-			TempColor = FLinearColor(1, 0, 0,1);
-		}else if (ActualType == InoLogTypes::Info)
-		{
-			TempColor = FLinearColor(0, 0, 1,1);
-		}else if (ActualType == InoLogTypes::Success)
-		{
-			TempColor = FLinearColor(0.05399, 1, 0,1);
-		}else if (ActualType == InoLogTypes::Unkown)
-		{
-			TempColor = FLinearColor(0, 1, 0.889834,1);
-		}else if (ActualType == InoLogTypes::Warning)
-		{
-			TempColor = FLinearColor(1, 0.464954, 0,1);
+		case EInoLogType::Display:
+			TypeColor = FLinearColor(0.0f, 0.66f, 1.0f);
+			break;
+
+		case EInoLogType::Success:
+			TypeColor = FLinearColor(0.0f, 1.0f, 0.1);
+			break;
+			
+		case EInoLogType::Warning:
+			TypeColor = FLinearColor(1.0f, 1.0f, 0.0f);
+			break;
+
+		case EInoLogType::Error:
+			TypeColor = FLinearColor(1.0f, 0.1f, 0.0f);
+			break;
+
+		case EInoLogType::Fatal:
+			TypeColor = FLinearColor(1.0f, 0.0f, 1.0f);
+			break;
+
+		default:
+			TypeColor = FLinearColor(0.0f, 0.66f, 1.0f);
+			break;
 		}
 	}else{
-		TempColor = CustomColor;
+		TypeColor = CustomColor;
 	}
 	
-	FString Output = "";
-
-	if (bShowTime){
-		Output.Append(FDateTime::UtcNow().ToString());
-		Output.Append("->");
+	FString OutputToShow = TEXT("");
+	
+	if (bAddTime){
+		OutputToShow.Append(FDateTime::UtcNow().ToString());
+		OutputToShow.Append("(>>)");
 	}
 
-	if (bShowCategory){
-		Output.Append(ActualCategory.ToString());
-		Output.Append("->");
-	}
-
-	FString TempObjectName= TEXT("Unkown");;
-	if (WorldContextObject && bShowObjectName){
-		TempObjectName = WorldContextObject->GetName();
-		Output.Append(TempObjectName);
-		Output.Append("->");
+	if (Category.IsValid()){
+		OutputToShow.Append(Category.ToString());
+		OutputToShow.Append("(>>)");
 	}
 	
-	Output.Append(Input);
+	if (WorldContextObject){
+		OutputToShow.Append(WorldContextObject->GetName());
+		OutputToShow.Append("(>>)");
+	}
+
+	OutputToShow.Append(InString);
 	
-	if (bScreenPrint || bOutputPtint)
+	UKismetSystemLibrary::PrintString(WorldContextObject, OutputToShow, bPrintToScreen, bPrintToLog, TypeColor, Duration, Key);
+	
+	if(false)
 	{
-		UKismetSystemLibrary::PrintString(WorldContextObject, Output, bScreenPrint, bOutputPtint, TempColor, Duration, (key.IsEmpty()) ?  NAME_None : FName(*key));
-	}
-
-	if (bInoLog || bServerLog)
-	{/*
-		UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
-		if (GameInstance)
+		switch (Type)
 		{
-			UInoBase* Inobase =	GameInstance->GetSubsystem<UInoBase>();
-			if (Inobase)
-			{
-				Inobase->InoLogCalled(Input, ActualType, ActualCategory,   TempObjectName, bInoLog, bServerLog);
-			}
-		} */
+			case EInoLogType::Display:
+				UE_LOG(InoLogCat, Display, TEXT("%s"), *OutputToShow);
+				break;
+
+			case EInoLogType::Success:
+				UE_LOG(InoLogCat, Log, TEXT("%s"), *OutputToShow);
+				break;
+
+			case EInoLogType::Warning:
+				UE_LOG(InoLogCat, Warning, TEXT("%s"), *OutputToShow);
+				break;
+
+			case EInoLogType::Error:
+				UE_LOG(InoLogCat, Error, TEXT("%s"), *OutputToShow);
+				break;
+
+			case EInoLogType::Fatal:
+				UE_LOG(InoLogCat, Fatal, TEXT("%s"), *OutputToShow);
+				break;
+
+			default:
+				UE_LOG(InoLogCat, Display, TEXT("%s"), *OutputToShow);
+				break;
+		}
 	}
 }
 

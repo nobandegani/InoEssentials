@@ -15,6 +15,8 @@
 
 #include "FL_Base.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(InoLogCat, All, All);
+
 /**
  * 
  */
@@ -32,22 +34,22 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Environment Variable", Keywords = "Get Environment Variable"), Category = "Ino|FL|Base")
 		static bool GetEnvironmentVariable(FString Env_Variable, FString& Env_Value);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Ino Log", Keywords = "Print, String, Log", WorldContext="WorldContextObject", HidePin = "WorldContextObject", CallableWithoutWorldContext, AdvancedDisplay = "3", GameplayTagFilter = "Ino.Log.", AutoCreateRefTerm = "Type, Category"), Category = "Ino|FL|Base")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Ino Log", Keywords = "Print, String, Log, print string", WorldContext="WorldContextObject", CallableWithoutWorldContext, HidePin = "WorldContextObject", AdvancedDisplay = "5", AutoCreateRefTerm = "Category"), Category = "Ino|FL|Base")
 		static void InoLog(
 			const UObject* WorldContextObject,
 			const FString& InString = FString(TEXT("Hello")),
-			float Duration = 5.f,
-			const FGameplayTag& Type = FGameplayTag(),
+
+			const EInoLogType Type = EInoLogType::Display,
 			const FGameplayTag& Category = FGameplayTag(),
-			bool bScreenPrint = true,
-			bool bOutputPtint = true,
-			bool bInoLog = false,
-			bool bServerLog = false,
+
+			float Duration = 2.f,
+			bool bPrintToScreen = true,
+			bool bPrintToLog = true,
+			const FName Key = NAME_None,
+			
 			FLinearColor CustomColor = FLinearColor(1.0, 1.0, 1.0),
-			const FString& key = FString(TEXT("None")),
-			bool bShowObjectName = true,
-			bool bShowCategory = false,
-			bool bShowTime = false
+			
+			bool bAddTime = false
 			); 
 	
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Base", meta  = (DisplayName = "Get Current ViewMode", Keywords = "get current input mode, input mode, ui mode"))

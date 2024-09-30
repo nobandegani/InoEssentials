@@ -5,6 +5,16 @@
 #include "FL_Base_StructLibrary.generated.h"
 
 UENUM(BlueprintType)
+enum class EInoLogType : uint8
+{
+	Display = 0,
+	Success = 1,
+	Warning = 2,
+	Error = 3,
+	Fatal = 4,
+};
+
+UENUM(BlueprintType)
 enum class EViewMode : uint8
 {
 	None,
