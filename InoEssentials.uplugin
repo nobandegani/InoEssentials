@@ -54,6 +54,11 @@
 			"Name": "InoSVG",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "InoVoiceChat",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
@@ -76,6 +81,12 @@
 			"Name": "BlueprintFileUtils",
 			"Enabled": true,
 			"Optional": true
+		},
+		{
+			"Name": "AudioCapture",
+			"Enabled": true,
+			"Optional": true
 		}
+		
 	]
 }
