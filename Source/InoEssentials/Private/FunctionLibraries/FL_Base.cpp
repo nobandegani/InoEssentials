@@ -53,9 +53,15 @@ void UFL_Base::InoLog(
 				
 	FLinearColor CustomColor,
 				
-	bool bAddTime
+	bool bAddTime,
+	bool bActive
 			)
 {
+	if(!bActive)
+	{
+		return;
+	}
+	
 	FLinearColor TypeColor;
 	if (CustomColor == FLinearColor(1.0, 1.0, 1.0))
 	{
@@ -110,16 +116,16 @@ void UFL_Base::InoLog(
 	
 	UKismetSystemLibrary::PrintString(WorldContextObject, OutputToShow, bPrintToScreen, bPrintToLog, TypeColor, Duration, Key);
 	
-	if(false)
+	if(bPrintToLog)
 	{
 		switch (Type)
 		{
 			case EInoLogType::Display:
-				UE_LOG(InoLogCat, Display, TEXT("%s"), *OutputToShow);
+				//UE_LOG(InoLogCat, Display, TEXT("%s"), *OutputToShow);
 				break;
 
 			case EInoLogType::Success:
-				UE_LOG(InoLogCat, Log, TEXT("%s"), *OutputToShow);
+				//UE_LOG(InoLogCat, Log, TEXT("%s"), *OutputToShow);
 				break;
 
 			case EInoLogType::Warning:
@@ -135,7 +141,7 @@ void UFL_Base::InoLog(
 				break;
 
 			default:
-				UE_LOG(InoLogCat, Display, TEXT("%s"), *OutputToShow);
+				//UE_LOG(InoLogCat, Display, TEXT("%s"), *OutputToShow);
 				break;
 		}
 	}
