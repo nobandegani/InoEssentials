@@ -14,6 +14,55 @@ enum class EInoLogType : uint8
 	Fatal = 4,
 };
 
+USTRUCT(BlueprintType)
+struct FInoLogConfig
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FInoLogConfig")
+	bool bPrintToScreen;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FInoLogConfig")
+	bool bPrintToLog;
+	
+	FInoLogConfig()
+		: bPrintToScreen(true), bPrintToLog(true)
+	{
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FInoLogPreset
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InoLogPreset")
+	bool bActive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InoLogPreset")
+	float Duration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InoLogPreset")
+	FInoLogConfig Display;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InoLogPreset")
+	FInoLogConfig Success;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InoLogPreset")
+	FInoLogConfig Warning;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InoLogPreset")
+	FInoLogConfig Error;
+	
+	FInoLogPreset()
+		: bActive(true), Duration(20.f), Display(), Success(), Warning(), Error()
+	{
+	}
+};
+
+
+
+
 UENUM(BlueprintType)
 enum class EViewMode : uint8
 {

@@ -27,14 +27,15 @@ class UFL_Base : public UBlueprintFunctionLibrary
 
 	UFL_Base(const FObjectInitializer& ObjectInitializer);
 
+	static const FInoLogPreset* CheckActorForInoLogPreset(const UObject* WorldContextObject);
 public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Is Editor?", Keywords = "is editor "), Category = "Ino|FL|Base")
 		static bool IsEditor();
 	
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Environment Variable", Keywords = "Get Environment Variable"), Category = "Ino|FL|Base")
 		static bool GetEnvironmentVariable(FString Env_Variable, FString& Env_Value);
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Ino Log", Keywords = "Print, String, Log, print string", WorldContext="WorldContextObject", CallableWithoutWorldContext, HidePin = "WorldContextObject", AdvancedDisplay = "5", AutoCreateRefTerm = "Category"), Category = "Ino|FL|Base")
+	
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Ino Log", Keywords = "Print, String, Log, print string", WorldContext="WorldContextObject", CallableWithoutWorldContext, HidePin = "WorldContextObject", AdvancedDisplay = "3", AutoCreateRefTerm = "Category"), Category = "Ino|FL|Base")
 		static void InoLog(
 			const UObject* WorldContextObject,
 			const FString& InString = FString(TEXT("Hello")),
@@ -42,7 +43,7 @@ public:
 			const EInoLogType Type = EInoLogType::Display,
 			const FGameplayTag& Category = FGameplayTag(),
 
-			float Duration = 2.f,
+			float Duration = 5.0f,
 			bool bPrintToScreen = true,
 			bool bPrintToLog = true,
 			const FName Key = NAME_None,
@@ -50,7 +51,8 @@ public:
 			FLinearColor CustomColor = FLinearColor(1.0, 1.0, 1.0),
 			
 			bool bAddTime = false,
-			bool bActive = true
+			bool bActive = true,
+			bool bUsePreset = false
 			); 
 	
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Base", meta  = (DisplayName = "Get Current ViewMode", Keywords = "get current input mode, input mode, ui mode"))

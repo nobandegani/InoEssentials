@@ -5,13 +5,12 @@
 #include "HAL/PlatformApplicationMisc.h"
 
 #include "Kismet/KismetSystemLibrary.h"
+#include "UObject/UnrealType.h"
 
 #include "Engine/World.h"
 #include "Engine/GameViewportClient.h"
 
 #include "Misc/ConfigCacheIni.h"
-
-#include "UObject/UnrealType.h"
 
 #include "GameFramework/PlayerController.h"
 #include "Misc/OutputDeviceNull.h"
@@ -22,6 +21,38 @@ UFL_Base::UFL_Base(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 
+}
+
+const FInoLogPreset* UFL_Base::CheckActorForInoLogPreset(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject)
+	{
+		UE_LOG(InoLogCat, Error, TEXT("world is not valid"));
+		return nullptr;
+	}
+	const AActor* Actor = Cast<AActor>(WorldContextObject);
+	if (!Actor)
+	{
+		UE_LOG(InoLogCat, Error, TEXT("world is not actor"));
+		return nullptr;
+	}
+
+	FProperty* Property = Actor->GetClass()->FindPropertyByName(FName("InoLogPreset"));
+	if (!Property)
+	{
+		UE_LOG(InoLogCat, Error, TEXT("there is no property by the name InoLogPreset"));
+		return nullptr;
+	}
+
+	FStructProperty* StructProperty = CastField<FStructProperty>(Property);
+	if (!StructProperty || StructProperty->Struct != FInoLogPreset::StaticStruct())
+	{
+		UE_LOG(InoLogCat, Error, TEXT("property is not same as FInoLogPreset"));
+		return nullptr;
+	}
+
+	// Get the address of the property in the actor instance and return it
+	return static_cast<const FInoLogPreset*>(StructProperty->ContainerPtrToValuePtr<void>(Actor));
 }
 
 bool UFL_Base::IsEditor()
@@ -54,9 +85,54 @@ void UFL_Base::InoLog(
 	FLinearColor CustomColor,
 				
 	bool bAddTime,
-	bool bActive
+	bool bActive,
+	bool bUsePreset
 			)
 {
+	if(!bActive)
+	{
+		return;
+	}
+	
+	if (bUsePreset && WorldContextObject)
+	{
+		const FInoLogPreset* LogPreset = CheckActorForInoLogPreset(WorldContextObject);
+		if (LogPreset)
+		{
+			bActive = LogPreset->bActive;
+			Duration = LogPreset->Duration;
+		
+			switch (Type)
+			{
+			case EInoLogType::Display:
+				bPrintToLog = LogPreset->Display.bPrintToLog;
+				bPrintToScreen = LogPreset->Display.bPrintToScreen;
+				break;
+
+			case EInoLogType::Success:
+				bPrintToLog = LogPreset->Success.bPrintToLog;
+				bPrintToScreen = LogPreset->Success.bPrintToScreen;
+				break;
+				
+			case EInoLogType::Warning:
+				bPrintToLog = LogPreset->Warning.bPrintToLog;
+				bPrintToScreen = LogPreset->Warning.bPrintToScreen;
+				break;
+
+			case EInoLogType::Error:
+				bPrintToLog = LogPreset->Error.bPrintToLog;
+				bPrintToScreen = LogPreset->Error.bPrintToScreen;
+				break;
+
+			default:
+				break;
+			}
+		}else
+		{
+			UE_LOG(InoLogCat, Error, TEXT("use preset is set but struct is not valid"));
+		}
+	}
+	
 	if(!bActive)
 	{
 		return;
@@ -114,7 +190,10 @@ void UFL_Base::InoLog(
 
 	OutputToShow.Append(InString);
 	
-	UKismetSystemLibrary::PrintString(WorldContextObject, OutputToShow, bPrintToScreen, bPrintToLog, TypeColor, Duration, Key);
+	if(bPrintToScreen)
+	{
+		UKismetSystemLibrary::PrintString(WorldContextObject, OutputToShow, bPrintToScreen, bPrintToLog, TypeColor, Duration, Key);
+	}
 	
 	if(bPrintToLog)
 	{
