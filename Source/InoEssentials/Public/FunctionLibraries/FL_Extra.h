@@ -38,13 +38,7 @@ public:
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Hash SHA1"), Category = "Ino|FL|Extra")
 	static FString HashSHA1(const FString& StringToHash);
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Convert TextureRenderTarget2D to Texture2D"), Category = "Ino|FL|Extra")
-	static UTexture2D* TRT2D_T2D( UTextureRenderTarget2D* InputRenderTarget2D, UObject* InOuter, FString Name = "Test");
 	
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Convert TextureRenderTargetCube to TextureCube"), Category = "Ino|FL|Extra")
-		static UTextureCube* TRTC_TC( UTextureRenderTargetCube* InputRenderTargetCube, UObject* InOuter, FString Name = "Test");
-
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Reflection Capture Component Set Cube"), Category = "Ino|FL|Extra")
 		static bool RCC_SetCube( UReflectionCaptureComponent* ReflectionCapture, UTextureCube* InputCube);
 
@@ -70,20 +64,27 @@ public:
 		static float GetTimelineStartTime(float MaxTime, float offset);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
-	static TArray<uint8> StringToData(const FString& InputString);
+		static TArray<uint8> StringToData(const FString& InputString);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
-	static FString DataToString(const TArray<uint8>& InputData);
+		static FString DataToString(const TArray<uint8>& InputData);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
-	static bool CompressDataWithOodle(
-		const TArray<uint8>& InUncompressedData,
-		EInoCompressor InCompressor,
-		EInoCompressionLevel InCompressionLevel,
-		int32& OutUnCompressedSize,
-		TArray<uint8>& OutCompressedData
-		);
+		static bool CompressDataWithOodle(
+			const TArray<uint8>& InUncompressedData,
+			EInoCompressor InCompressor,
+			EInoCompressionLevel InCompressionLevel,
+			int32& OutUnCompressedSize,
+			TArray<uint8>& OutCompressedData
+			);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
-	static bool DecompressDataWithOodle(const TArray<uint8>& InCompressedData, const int32& InUnCompressedSize, TArray<uint8>& OutUncompressedData);
+		static bool DecompressDataWithOodle(const TArray<uint8>& InCompressedData, const int32& InUnCompressedSize, TArray<uint8>& OutUncompressedData);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
+		static UTexture2D* CreateTexture2dFromRenderTarget2d(UObject* WorldContextObject, UTextureRenderTarget2D* RenderTarget);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
+	static UTexture2D* CreateR16FTextureFromRenderTargetAlpha(UObject* WorldContextObject, UTextureRenderTarget2D* RenderTarget);
+	
 };

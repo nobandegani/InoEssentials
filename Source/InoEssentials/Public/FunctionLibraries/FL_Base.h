@@ -49,7 +49,8 @@ public:
 			
 			FLinearColor CustomColor = FLinearColor(1.0, 1.0, 1.0),
 			
-			bool bAddTime = false
+			bool bAddTime = false,
+			bool bActive = true
 			); 
 	
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Base", meta  = (DisplayName = "Get Current ViewMode", Keywords = "get current input mode, input mode, ui mode"))

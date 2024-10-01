@@ -7,6 +7,9 @@
 #include "GeneralProjectSettings.h"
 #include "Misc/FileHelper.h"
 
+#include "Engine/TextureRenderTargetCube.h"
+#include "Engine/TextureRenderTarget2D.h"
+
 UFL_EditorBase::UFL_EditorBase(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -96,4 +99,14 @@ bool UFL_EditorBase::SetStringInEditorConfig(const FString SectionName, const FS
 bool UFL_EditorBase::GetStringFromEditorConfig(const FString SectionName, const FString KeyName, FString& Value)
 {
 	return GConfig->GetString(*SectionName, *KeyName, Value, GEditorIni);
+}
+
+UTexture2D* UFL_EditorBase::TRT2D_T2D(UTextureRenderTarget2D* InputRenderTarget2D, UObject* InOuter, FString Name)
+{
+	return InputRenderTarget2D->ConstructTexture2D(InOuter, Name, EObjectFlags::RF_Public);
+}
+
+UTextureCube* UFL_EditorBase::TRTC_TC(UTextureRenderTargetCube* InputRenderTargetCube, UObject* InOuter, FString Name)
+{
+	return InputRenderTargetCube->ConstructTextureCube(InOuter, Name, EObjectFlags::RF_Public);
 }

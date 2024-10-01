@@ -42,4 +42,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, CallInEditor,DisplayName="Get String From Editor Config", Category = "Ino|Editor|Base")
 		static bool GetStringFromEditorConfig(const FString SectionName, const FString KeyName, FString& Value);
+
+	UFUNCTION(BlueprintCallable, CallInEditor, meta = (DisplayName = "Convert TextureRenderTarget2D to Texture2D"), Category = "Ino|Editor|Base")
+	static UTexture2D* TRT2D_T2D( UTextureRenderTarget2D* InputRenderTarget2D, UObject* InOuter, FString Name = "Test");
+	
+	UFUNCTION(BlueprintCallable, CallInEditor, meta = (DisplayName = "Convert TextureRenderTargetCube to TextureCube"), Category = "Ino|Editor|Base")
+	static UTextureCube* TRTC_TC( UTextureRenderTargetCube* InputRenderTargetCube, UObject* InOuter, FString Name = "Test");
 };
