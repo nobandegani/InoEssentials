@@ -27,32 +27,30 @@ const FInoLogPreset* UFL_Base::CheckActorForInoLogPreset(const UObject* WorldCon
 {
 	if (!WorldContextObject)
 	{
-		UE_LOG(InoLogCat, Error, TEXT("world is not valid"));
+		//UE_LOG(InoLogCat, Error, TEXT("world is not valid"));
 		return nullptr;
 	}
-	const AActor* Actor = Cast<AActor>(WorldContextObject);
-	if (!Actor)
+	const UObject* Object = Cast<UObject>(WorldContextObject);
+	if (!Object)
 	{
-		UE_LOG(InoLogCat, Error, TEXT("world is not actor"));
+		//UE_LOG(InoLogCat, Error, TEXT("world is not actor"));
 		return nullptr;
 	}
 
-	FProperty* Property = Actor->GetClass()->FindPropertyByName(FName("InoLogPreset"));
+	FProperty* Property = Object->GetClass()->FindPropertyByName(FName("InoLogPreset"));
 	if (!Property)
 	{
-		UE_LOG(InoLogCat, Error, TEXT("there is no property by the name InoLogPreset"));
+		//UE_LOG(InoLogCat, Error, TEXT("there is no property by the name InoLogPreset"));
 		return nullptr;
 	}
 
 	FStructProperty* StructProperty = CastField<FStructProperty>(Property);
 	if (!StructProperty || StructProperty->Struct != FInoLogPreset::StaticStruct())
 	{
-		UE_LOG(InoLogCat, Error, TEXT("property is not same as FInoLogPreset"));
+		//UE_LOG(InoLogCat, Error, TEXT("property is not same as FInoLogPreset"));
 		return nullptr;
 	}
-
-	// Get the address of the property in the actor instance and return it
-	return static_cast<const FInoLogPreset*>(StructProperty->ContainerPtrToValuePtr<void>(Actor));
+	return static_cast<const FInoLogPreset*>(StructProperty->ContainerPtrToValuePtr<void>(Object));
 }
 
 bool UFL_Base::IsEditor()
@@ -73,8 +71,9 @@ bool UFL_Base::GetEnvironmentVariable(FString Env_Variable, FString& Env_Value)
 void UFL_Base::InoLog(
 	const UObject* WorldContextObject,
 	const FString& InString,
-
 	const EInoLogType Type,
+	bool bUsePreset,
+	
 	const FGameplayTag& Category,
 
 	float Duration,
@@ -85,8 +84,7 @@ void UFL_Base::InoLog(
 	FLinearColor CustomColor,
 				
 	bool bAddTime,
-	bool bActive,
-	bool bUsePreset
+	bool bActive
 			)
 {
 	if(!bActive)
@@ -127,9 +125,6 @@ void UFL_Base::InoLog(
 			default:
 				break;
 			}
-		}else
-		{
-			UE_LOG(InoLogCat, Error, TEXT("use preset is set but struct is not valid"));
 		}
 	}
 	

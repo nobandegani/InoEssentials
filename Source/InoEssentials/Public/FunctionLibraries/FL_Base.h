@@ -35,12 +35,13 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Environment Variable", Keywords = "Get Environment Variable"), Category = "Ino|FL|Base")
 		static bool GetEnvironmentVariable(FString Env_Variable, FString& Env_Value);
 	
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Ino Log", Keywords = "Print, String, Log, print string", WorldContext="WorldContextObject", CallableWithoutWorldContext, HidePin = "WorldContextObject", AdvancedDisplay = "3", AutoCreateRefTerm = "Category"), Category = "Ino|FL|Base")
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Ino Log", Keywords = "Print, String, Log, print string", WorldContext="WorldContextObject", CallableWithoutWorldContext, HidePin = "WorldContextObject", AdvancedDisplay = "4", AutoCreateRefTerm = "Category"), Category = "Ino|FL|Base")
 		static void InoLog(
 			const UObject* WorldContextObject,
 			const FString& InString = FString(TEXT("Hello")),
-
 			const EInoLogType Type = EInoLogType::Display,
+			bool bUsePreset = false,
+			
 			const FGameplayTag& Category = FGameplayTag(),
 
 			float Duration = 5.0f,
@@ -51,8 +52,7 @@ public:
 			FLinearColor CustomColor = FLinearColor(1.0, 1.0, 1.0),
 			
 			bool bAddTime = false,
-			bool bActive = true,
-			bool bUsePreset = false
+			bool bActive = true
 			); 
 	
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Base", meta  = (DisplayName = "Get Current ViewMode", Keywords = "get current input mode, input mode, ui mode"))
