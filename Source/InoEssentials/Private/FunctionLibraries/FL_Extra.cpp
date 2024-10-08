@@ -220,7 +220,7 @@ FString UFL_Extra::DecryptAES(const FString& EncryptedText, const FString& Key)
 	return DecryptedString;
 }
 
-float UFL_Extra::GetTimelineStartTime(float MaxTime, float offset)
+float UFL_Extra::CalculateSyncedTimer(float MaxTime, float offset)
 {
 	if (MaxTime <= 0.0f)
 	{
@@ -236,7 +236,7 @@ float UFL_Extra::GetTimelineStartTime(float MaxTime, float offset)
 
 	double TotalSeconds = static_cast<double>(UnixTimestamp) + (Milliseconds / 1000.0);
 
-	double OffsetTotalSeconds = (TotalSeconds+offset) > 60 ? (TotalSeconds-offset) : (TotalSeconds+offset);
+	double OffsetTotalSeconds = TotalSeconds+offset;
 
 	double StartingTime = FMath::Fmod(OffsetTotalSeconds, static_cast<double>(MaxTime));
 
