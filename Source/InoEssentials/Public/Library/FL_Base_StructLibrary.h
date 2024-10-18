@@ -41,6 +41,9 @@ struct FInoLogPreset
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InoLogPreset")
 	float Duration;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InoLogPreset")
+    	bool bDrawDebug;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InoLogPreset")
 	FInoLogConfig Display;
