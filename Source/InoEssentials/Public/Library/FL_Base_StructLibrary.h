@@ -58,7 +58,7 @@ struct FInoLogPreset
 	FInoLogConfig Error;
 	
 	FInoLogPreset()
-		: bActive(true), Duration(20.f), Display(), Success(), Warning(), Error()
+		: bActive(true), Duration(20.f), bDrawDebug(true), Display(), Success(), Warning(), Error()
 	{
 	}
 };
