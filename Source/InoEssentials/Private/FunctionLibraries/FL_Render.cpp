@@ -193,3 +193,217 @@ FVector UFL_Render::GetWorldPositionFromRenderTarget(UTextureRenderTarget2D* Ren
 	UE_LOG(LogTemp, Warning, TEXT("Failed to read pixel data from render target"));
 	return FVector::ZeroVector;
 }
+
+EPixelFormat InoReadRenderTargetHelper(TArray<FColor>& OutLDRValues, TArray<FLinearColor>& OutHDRValues,
+	UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget, int32 X, int32 Y, int32 Width,
+	int32 Height, bool bNormalize)
+{
+	EPixelFormat OutFormat = PF_Unknown;
+
+	if (!TextureRenderTarget)
+	{
+		return OutFormat;
+	}
+
+	FTextureRenderTarget2DResource* RTResource = (FTextureRenderTarget2DResource*)TextureRenderTarget->GameThread_GetRenderTargetResource();
+	if (!RTResource)
+	{
+		return OutFormat;
+	}
+
+	X = FMath::Clamp(X, 0, TextureRenderTarget->SizeX - 1);
+	Y = FMath::Clamp(Y, 0, TextureRenderTarget->SizeY - 1);
+	Width = FMath::Clamp(Width, 1, TextureRenderTarget->SizeX);
+	Height = FMath::Clamp(Height, 1, TextureRenderTarget->SizeY);
+	Width = Width - FMath::Max(X + Width - TextureRenderTarget->SizeX, 0);
+	Height = Height - FMath::Max(Y + Height - TextureRenderTarget->SizeY, 0);
+
+	FIntRect SampleRect(X, Y, X + Width, Y + Height);
+
+	FReadSurfaceDataFlags ReadSurfaceDataFlags = bNormalize ? FReadSurfaceDataFlags() : FReadSurfaceDataFlags(RCM_MinMax);
+
+	FRenderTarget* RenderTarget = TextureRenderTarget->GameThread_GetRenderTargetResource();
+	OutFormat = TextureRenderTarget->GetFormat();
+
+	const int32 NumPixelsToRead = Width * Height;
+
+	switch (OutFormat)
+	{
+	case PF_B8G8R8A8:
+		if (!RenderTarget->ReadPixels(OutLDRValues, ReadSurfaceDataFlags, SampleRect))
+		{
+			OutFormat = PF_Unknown;
+		}
+		else
+		{
+			check(OutLDRValues.Num() == NumPixelsToRead);
+		}
+		break;
+	case PF_FloatRGBA:
+		if (!RenderTarget->ReadLinearColorPixels(OutHDRValues, ReadSurfaceDataFlags, SampleRect))
+		{
+			OutFormat = PF_Unknown;
+		}
+		else
+		{
+			check(OutHDRValues.Num() == NumPixelsToRead);
+		}
+		break;
+	case PF_A32B32G32R32F:
+		if (!RenderTarget->ReadLinearColorPixels(OutHDRValues, ReadSurfaceDataFlags, SampleRect))
+		{
+			OutFormat = PF_Unknown;
+		}
+		else
+		{
+			check(OutHDRValues.Num() == NumPixelsToRead);
+		}
+		break;
+	default:
+		OutFormat = PF_Unknown;
+		break;
+	}
+
+	return OutFormat;
+}
+
+FLinearColor UFL_Render::ReadRawPixelFromRenderTarget(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget, int32 X, int32 Y, bool bNormalize)
+{
+	TArray<FColor> Samples;
+	TArray<FLinearColor> LinearSamples;
+
+	switch (InoReadRenderTargetHelper(Samples, LinearSamples, WorldContextObject, TextureRenderTarget, X, Y, 1, 1, bNormalize))
+	{
+	case PF_B8G8R8A8:
+		check(Samples.Num() == 1 && LinearSamples.Num() == 0);
+		return FLinearColor(float(Samples[0].R), float(Samples[0].G), float(Samples[0].B), float(Samples[0].A));
+	case PF_FloatRGBA:
+		check(Samples.Num() == 0 && LinearSamples.Num() == 1);
+		return LinearSamples[0];
+	case PF_A32B32G32R32F:
+		check(Samples.Num() == 0 && LinearSamples.Num() == 1);
+		return LinearSamples[0];
+	case PF_Unknown:
+	default:
+		return FLinearColor::Red;
+	}
+}
+
+bool UFL_Render::ReadRawPixelsFromRenderTarget(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget,
+	TArray<FLinearColor>& OutLinearSamples, bool bNormalize)
+{
+	if (WorldContextObject != nullptr && TextureRenderTarget != nullptr)
+	{
+		const int32 NumSamples = TextureRenderTarget->SizeX * TextureRenderTarget->SizeY;
+
+		OutLinearSamples.Reset(NumSamples);
+		TArray<FColor> Samples;
+		Samples.Reserve(NumSamples);
+
+		switch (InoReadRenderTargetHelper(Samples, OutLinearSamples, WorldContextObject, TextureRenderTarget, 0, 0, TextureRenderTarget->SizeX, TextureRenderTarget->SizeY, bNormalize))
+		{
+		case PF_B8G8R8A8:
+			check(Samples.Num() == NumSamples && OutLinearSamples.Num() == 0);
+			for (int32 SampleIndex = 0; SampleIndex < NumSamples; ++SampleIndex)
+			{
+				OutLinearSamples.Add(FLinearColor(float(Samples[SampleIndex].R), float(Samples[SampleIndex].G), float(Samples[SampleIndex].B), float(Samples[SampleIndex].A)));
+			}
+			return true;
+		case PF_FloatRGBA:
+			check(Samples.Num() == 0 && OutLinearSamples.Num() == NumSamples);
+			return true;
+		case PF_A32B32G32R32F:
+			check(Samples.Num() == 0 && OutLinearSamples.Num() == NumSamples);
+			return true;
+		case PF_Unknown:
+		default:
+			return false;
+		}
+	}
+
+	return false;
+}
+
+bool UFL_Render::SavePixelsToFile(UObject* WorldContextObject, const TArray<FLinearColor> InLinearSamples,
+	const FString& FilePath, const bool bOverride, const bool bCompress, EInoCompressor InCompressor,
+	EInoCompressionLevel InCompressionLevel)
+{
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	FString Directory = FPaths::GetPath(FilePath);
+	if (!PlatformFile.DirectoryExists(*Directory))
+	{
+		bool isValidPath = PlatformFile.CreateDirectory(*Directory);
+		if (!isValidPath)
+		{
+			UE_LOG(LogTemp, Error, TEXT("directory dosnt exist and cant be created"));
+			return false;
+		}
+	}
+	
+	if (InLinearSamples.Num() == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to save: Input data is empty."));
+		return false;
+	}
+	
+	TArray<uint8> Data;
+	
+	if (bCompress)
+	{
+		UE_LOG(LogTemp, Log, TEXT("start compressing data"));
+		TArray<uint8> CompressedData;
+		FOodleDataCompression::ECompressor OodleCompressor = static_cast<FOodleDataCompression::ECompressor>(static_cast<int32>(InCompressor));
+		FOodleDataCompression::ECompressionLevel CompressionLevel = static_cast<FOodleDataCompression::ECompressionLevel>((static_cast<int32>(InCompressionLevel) -4));
+		UE_LOG(LogTemp, Log, TEXT("Compressor: %d, Compression Level: %d"), static_cast<int32>(OodleCompressor), static_cast<int32>(CompressionLevel));
+
+		int32 MaxCompressedSize = FOodleDataCompression::GetMaximumCompressedSize(InLinearSamples.Num());
+		MaxCompressedSize += MaxCompressedSize / 2;
+		CompressedData.SetNumUninitialized(MaxCompressedSize);
+
+		int32 CompressedSize = FOodleDataCompression::Compress(
+					CompressedData.GetData(),
+					MaxCompressedSize,
+					InLinearSamples.GetData(), //reinterpret_cast<const uint8*>(InLinearSamples.GetData()),
+					InLinearSamples.Num(),
+					OodleCompressor,
+					CompressionLevel
+					);
+		
+		if (CompressedSize > 0)
+		{
+			CompressedData.SetNum(CompressedSize);
+			Data = CompressedData;
+			CompressedData.Empty();
+			UE_LOG(LogTemp, Log, TEXT("Compression successful!"));
+		}else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Compression failed! CompressedSize returned as 0 or less."));
+			CompressedData.Empty();
+			return false;
+		}
+	}else
+	{
+		Data.Append(reinterpret_cast<const uint8*>(InLinearSamples.GetData()), InLinearSamples.Num() * sizeof(FLinearColor));
+	}
+	
+	UE_LOG(LogTemp, Log, TEXT("start saving file"));
+
+	if (PlatformFile.FileExists(*FilePath) && !bOverride)
+	{
+		UE_LOG(LogTemp, Error, TEXT("File already exists and override is not allowed."));
+		return false;
+	}
+
+	if (FFileHelper::SaveArrayToFile(Data, *FilePath))
+	{
+		UE_LOG(LogTemp, Log, TEXT("File saved successfully: %s"), *FilePath);
+		return true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to save file: %s"), *FilePath);
+		return false;
+	}
+	
+}
+
