@@ -100,5 +100,6 @@ enum class EInoCompressionLevel : uint8
 	Optimal1 = 9,
 	Optimal2 = 10,
 	Optimal3 = 11,
-	Optimal4 = 12, // if another added update CompressionLevelNameMap
+	Optimal4 = 12,
+	Optimal5 = 13,// if another added update CompressionLevelNameMap
 };
