@@ -20,7 +20,9 @@ public class InoEssentials : ModuleRules
 				"UMG",
 				"Networking", 
 				"Sockets",
-				"OodleDataCompression"
+				"OodleDataCompression",
+				"RHI",      
+				"RenderCore"
 			}
 			);
 		

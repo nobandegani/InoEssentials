@@ -28,20 +28,17 @@ public:
 		static bool Base64Decode(const FString& EncodedString, FString &DecodedString);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Base64 Encode Data"), Category = "Ino|FL|Extra")
-	static bool Base64EncodeData(const TArray<uint8>& Data, FString& EncodedData);
+		static bool Base64EncodeData(const TArray<uint8>& Data, FString& EncodedData);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Base64 Decode Data"), Category = "Ino|FL|Extra")
-	static bool Base64DecodeData(const FString& EncodedData, TArray<uint8>& DecodedData);
+		static bool Base64DecodeData(const FString& EncodedData, TArray<uint8>& DecodedData);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Hash MD5"), Category = "Ino|FL|Extra")
-	static FString HashMD5(const FString& StringToHash);
+		static FString HashMD5(const FString& StringToHash);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Ino Hash SHA1"), Category = "Ino|FL|Extra")
-	static FString HashSHA1(const FString& StringToHash);
+		static FString HashSHA1(const FString& StringToHash);
 	
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Reflection Capture Component Set Cube"), Category = "Ino|FL|Extra")
-		static bool RCC_SetCube( UReflectionCaptureComponent* ReflectionCapture, UTextureCube* InputCube);
-
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Load String From File"), Category = "Ino|FL|Extra")
 		static bool LoadStringFromFile(const FString& FilePath, FString& LoadedString);
 	
@@ -80,11 +77,4 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
 		static bool DecompressDataWithOodle(const TArray<uint8>& InCompressedData, const int32& InUnCompressedSize, TArray<uint8>& OutUncompressedData);
-
-	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
-		static UTexture2D* CreateTexture2dFromRenderTarget2d(UObject* WorldContextObject, UTextureRenderTarget2D* RenderTarget);
-
-	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
-	static UTexture2D* CreateR16FTextureFromRenderTargetAlpha(UObject* WorldContextObject, UTextureRenderTarget2D* RenderTarget);
-	
 };
