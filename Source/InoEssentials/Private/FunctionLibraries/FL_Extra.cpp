@@ -267,19 +267,16 @@ FString UFL_Extra::DataToString(const TArray<uint8>& InputData)
 }
 
 bool UFL_Extra::CompressDataWithOodle(
-	const TArray<uint8>& InUncompressedData,
+	const TArray<uint8>& InDecompressedData,
 	EInoCompressor InCompressor,
 	EInoCompressionLevel InCompressionLevel,
-	int32& OutUnCompressedSize,
+	int32& OutDeCompressedSize,
 	TArray<uint8>& OutCompressedData
 	)
 {
-	TArray<uint8> CompressedData;
-
-	// Log the start of the compression process
 	UE_LOG(LogTemp, Log, TEXT("Starting compression with Oodle..."));
 	
-	if (InUncompressedData.Num() == 0)
+	if (InDecompressedData.Num() == 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to compress: Input data is empty."));
 		return false;
@@ -290,19 +287,25 @@ bool UFL_Extra::CompressDataWithOodle(
 
 	UE_LOG(LogTemp, Log, TEXT("Compressor: %d, Compression Level: %d"), static_cast<int32>(OodleCompressor), static_cast<int32>(CompressionLevel));
 
-	int64 UnCompressedSize = InUncompressedData.NumBytes();
+	int64 DeCompressedSize = InDecompressedData.NumBytes();
 	
-	int64 MaxCompressedSize = FOodleDataCompression::CompressedBufferSizeNeeded(UnCompressedSize);
-	
-	CompressedData.SetNumUninitialized(MaxCompressedSize);
+	int64 MaxCompressedSize = FOodleDataCompression::CompressedBufferSizeNeeded(DeCompressedSize);
 
-	UE_LOG(LogTemp, Log, TEXT("Uncompressed size: %lld bytes, Max compressed size: %lld bytes"), UnCompressedSize, MaxCompressedSize);
+	if (MaxCompressedSize <= 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid max compressed size: %lld"), MaxCompressedSize);
+		return false;
+	}
+	
+	OutCompressedData.SetNumUninitialized(MaxCompressedSize);
+
+	UE_LOG(LogTemp, Log, TEXT("Uncompressed size: %lld bytes, Max compressed size: %lld bytes"), DeCompressedSize, MaxCompressedSize);
 	
 	int64 CompressedSize = FOodleDataCompression::Compress(
-		CompressedData.GetData(),
+		OutCompressedData.GetData(),
 		MaxCompressedSize,
-		InUncompressedData.GetData(),
-		UnCompressedSize,
+		InDecompressedData.GetData(),
+		DeCompressedSize,
 		OodleCompressor,
 		CompressionLevel
 	);
@@ -311,42 +314,38 @@ bool UFL_Extra::CompressDataWithOodle(
 	
 	if (CompressedSize > 0)
 	{
-		CompressedData.SetNum(CompressedSize);
-		OutUnCompressedSize = UnCompressedSize;
-		OutCompressedData = CompressedData;
+		OutCompressedData.SetNum(CompressedSize);
+		OutDeCompressedSize = static_cast<int32>(DeCompressedSize);
 		UE_LOG(LogTemp, Log, TEXT("Compression successful!"));
 		return true;
 	}
 
 	UE_LOG(LogTemp, Error, TEXT("Compression failed! CompressedSize returned as 0 or less."));
-	CompressedData.Empty();
+	OutCompressedData.Empty();
 	return false;
 }
 
-bool UFL_Extra::DecompressDataWithOodle(const TArray<uint8>& InCompressedData, const int32& InUnCompressedSize,
-	TArray<uint8>& OutUncompressedData)
+bool UFL_Extra::DecompressDataWithOodle(const TArray<uint8>& InCompressedData, const int32& InDeCompressedSize,
+	TArray<uint8>& OutDecompressedData)
 {
-	TArray<uint8> DecompressedData;
-
-	if (InCompressedData.Num() == 0 || InUnCompressedSize <= 0)
+	if (InCompressedData.Num() == 0 || InDeCompressedSize <= 0)
 	{
 		return false;
 	}
 	
-	DecompressedData.SetNumUninitialized(InUnCompressedSize);
+	OutDecompressedData.SetNumUninitialized(InDeCompressedSize);
 	
 	bool bSuccess = FOodleDataCompression::Decompress(
-		DecompressedData.GetData(),              
-		InUnCompressedSize,                        
+		OutDecompressedData.GetData(),              
+		InDeCompressedSize,                        
 		InCompressedData.GetData(),                
 		InCompressedData.NumBytes()
 	);
 	
 	if (!bSuccess)
 	{
-		DecompressedData.Empty();
+		OutDecompressedData.Empty();
 	};
 	
-	OutUncompressedData = DecompressedData;
 	return bSuccess;
 }

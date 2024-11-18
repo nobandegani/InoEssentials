@@ -65,16 +65,19 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
 		static FString DataToString(const TArray<uint8>& InputData);
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
 		static bool CompressDataWithOodle(
-			const TArray<uint8>& InUncompressedData,
+			const TArray<uint8>& InDecompressedData,
 			EInoCompressor InCompressor,
 			EInoCompressionLevel InCompressionLevel,
-			int32& OutUnCompressedSize,
+			int32& OutDeCompressedSize,
 			TArray<uint8>& OutCompressedData
 			);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
-		static bool DecompressDataWithOodle(const TArray<uint8>& InCompressedData, const int32& InUnCompressedSize, TArray<uint8>& OutUncompressedData);
+		static bool DecompressDataWithOodle(
+			const TArray<uint8>& InCompressedData,
+			const int32& InDeCompressedSize,
+			TArray<uint8>& OutDecompressedData);
 };
