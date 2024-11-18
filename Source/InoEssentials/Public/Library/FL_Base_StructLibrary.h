@@ -103,3 +103,32 @@ enum class EInoCompressionLevel : uint8
 	Optimal4 = 12,
 	Optimal5 = 13,// if another added update CompressionLevelNameMap
 };
+
+UENUM(BlueprintType)
+enum class EInoDataType : uint8
+{
+	Bit8 = 0,
+	Bit16 = 1,
+	Bit32 = 2,
+	Bit64 = 4
+};
+
+UENUM(BlueprintType)
+enum class EInoChannelType : uint8
+{
+	R = 0,
+	G = 1,
+	B = 2,
+
+	RGB = 3,
+	RGBA = 4,
+	
+	RG = 5,
+	RB = 6,
+	GB = 7,
+	
+	A = 8,
+	RA = 9,
+	GA = 10,
+	BA = 11,
+};

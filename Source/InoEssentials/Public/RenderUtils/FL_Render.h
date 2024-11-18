@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
+#include "Library/FL_Base_StructLibrary.h"
+
 #include "FL_Render.generated.h"
 
 /**
@@ -43,7 +45,26 @@ public:
 		static bool ReadRawPixelsFromRenderTarget(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget, TArray<FLinearColor>& OutLinearSamples, bool bNormalize = true);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render", meta = (Keywords = "ReadRenderTarget", WorldContext = "WorldContextObject"))
-	static bool SavePixelsToFile(UObject* WorldContextObject, const TArray<FLinearColor> InLinearSamples, const FString& FilePath, const bool bOverride, const bool bCompress, EInoCompressor InCompressor, EInoCompressionLevel InCompressionLevel);
+		static bool SavePixelsToFile(
+			UObject* WorldContextObject,
+			const TArray<FLinearColor>& InLinearSamples,
+			const FString& InFilePath,
+			const bool bOverride,
+			const bool bCompress,
+			EInoCompressor InCompressor,
+			EInoCompressionLevel InCompressionLevel,
+			FString& OutFilePath);
+	
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render", meta = (Keywords = "ReadRenderTarget", WorldContext = "WorldContextObject"))
+		static bool LoadPixelsFromFile(
+			UObject* WorldContextObject,
+			const FString& FilePath,
+			const bool bDeCompress,
+			TArray<FLinearColor>& InLinearSamples);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render")
+		static bool DeserializeLinearColorArray(const TArray<uint8>& Data, TArray<FLinearColor>& OutLinearSamples);
 private:
 	
 };

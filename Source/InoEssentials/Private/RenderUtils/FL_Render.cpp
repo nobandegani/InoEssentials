@@ -1,6 +1,6 @@
 /* Copyright (c) 2021-2023 by Inoland */
 
-#include "FunctionLibraries/FL_Render.h"
+#include "RenderUtils/FL_Render.h"
 
 #include "Serialization/MemoryReader.h"
 #include "Serialization/MemoryWriter.h"
@@ -324,18 +324,30 @@ bool UFL_Render::ReadRawPixelsFromRenderTarget(UObject* WorldContextObject, UTex
 	return false;
 }
 
-bool UFL_Render::SavePixelsToFile(UObject* WorldContextObject, const TArray<FLinearColor> InLinearSamples,
-	const FString& FilePath, const bool bOverride, const bool bCompress, EInoCompressor InCompressor,
-	EInoCompressionLevel InCompressionLevel)
+bool UFL_Render::SavePixelsToFile(
+	UObject* WorldContextObject,
+	const TArray<FLinearColor>& InLinearSamples,
+	const FString& InFilePath,
+	const bool bOverride,
+	const bool bCompress,
+	EInoCompressor InCompressor,
+	EInoCompressionLevel InCompressionLevel,
+	FString& OutFilePath)
 {
+	if (InFilePath.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to save: FilePath is empty."));
+		return false;
+	}
+	
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	FString Directory = FPaths::GetPath(FilePath);
+	FString Directory = FPaths::GetPath(OutFilePath);
 	if (!PlatformFile.DirectoryExists(*Directory))
 	{
 		bool isValidPath = PlatformFile.CreateDirectory(*Directory);
 		if (!isValidPath)
 		{
-			UE_LOG(LogTemp, Error, TEXT("directory dosnt exist and cant be created"));
+			UE_LOG(LogTemp, Error, TEXT("Directory doesn't exist and couldn't be created: %s"), *Directory);
 			return false;
 		}
 	}
@@ -347,24 +359,27 @@ bool UFL_Render::SavePixelsToFile(UObject* WorldContextObject, const TArray<FLin
 	}
 	
 	TArray<uint8> Data;
+	int64 UnCompressedSize = InLinearSamples.NumBytes();
 	
 	if (bCompress)
 	{
-		UE_LOG(LogTemp, Log, TEXT("start compressing data"));
+		UE_LOG(LogTemp, Log, TEXT("Start compressing data"));
 		TArray<uint8> CompressedData;
 		FOodleDataCompression::ECompressor OodleCompressor = static_cast<FOodleDataCompression::ECompressor>(static_cast<int32>(InCompressor));
 		FOodleDataCompression::ECompressionLevel CompressionLevel = static_cast<FOodleDataCompression::ECompressionLevel>((static_cast<int32>(InCompressionLevel) -4));
 		UE_LOG(LogTemp, Log, TEXT("Compressor: %d, Compression Level: %d"), static_cast<int32>(OodleCompressor), static_cast<int32>(CompressionLevel));
 
-		int32 MaxCompressedSize = FOodleDataCompression::GetMaximumCompressedSize(InLinearSamples.Num());
-		MaxCompressedSize += MaxCompressedSize / 2;
+		int64 MaxCompressedSize = FOodleDataCompression::CompressedBufferSizeNeeded(UnCompressedSize);
+		
 		CompressedData.SetNumUninitialized(MaxCompressedSize);
 
-		int32 CompressedSize = FOodleDataCompression::Compress(
+		UE_LOG(LogTemp, Log, TEXT("Uncompressed size: %lld bytes, Max compressed size: %lld bytes"), UnCompressedSize, MaxCompressedSize);
+		
+		int64 CompressedSize = FOodleDataCompression::Compress(
 					CompressedData.GetData(),
 					MaxCompressedSize,
-					InLinearSamples.GetData(), //reinterpret_cast<const uint8*>(InLinearSamples.GetData()),
-					InLinearSamples.Num(),
+					reinterpret_cast<const uint8*>(InLinearSamples.GetData()),
+					UnCompressedSize,
 					OodleCompressor,
 					CompressionLevel
 					);
@@ -374,7 +389,7 @@ bool UFL_Render::SavePixelsToFile(UObject* WorldContextObject, const TArray<FLin
 			CompressedData.SetNum(CompressedSize);
 			Data = CompressedData;
 			CompressedData.Empty();
-			UE_LOG(LogTemp, Log, TEXT("Compression successful!"));
+			UE_LOG(LogTemp, Log, TEXT("Compression successful! Compressed size: %lld bytes"), CompressedSize);
 		}else
 		{
 			UE_LOG(LogTemp, Error, TEXT("Compression failed! CompressedSize returned as 0 or less."));
@@ -383,27 +398,119 @@ bool UFL_Render::SavePixelsToFile(UObject* WorldContextObject, const TArray<FLin
 		}
 	}else
 	{
+		UE_LOG(LogTemp, Log, TEXT("Skipping compression, saving raw data."));
 		Data.Append(reinterpret_cast<const uint8*>(InLinearSamples.GetData()), InLinearSamples.Num() * sizeof(FLinearColor));
 	}
 	
 	UE_LOG(LogTemp, Log, TEXT("start saving file"));
 
-	if (PlatformFile.FileExists(*FilePath) && !bOverride)
+	OutFilePath = InFilePath + FString::Printf(TEXT("-%lld"), UnCompressedSize) + TEXT(".InoV4F");
+	if (PlatformFile.FileExists(*OutFilePath) && !bOverride)
 	{
 		UE_LOG(LogTemp, Error, TEXT("File already exists and override is not allowed."));
 		return false;
 	}
 
-	if (FFileHelper::SaveArrayToFile(Data, *FilePath))
+	if (FFileHelper::SaveArrayToFile(Data, *OutFilePath))
 	{
-		UE_LOG(LogTemp, Log, TEXT("File saved successfully: %s"), *FilePath);
+		UE_LOG(LogTemp, Log, TEXT("File saved successfully: %s"), *OutFilePath);
 		return true;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to save file: %s"), *FilePath);
+		UE_LOG(LogTemp, Error, TEXT("Failed to save file: %s"), *OutFilePath);
+		return false;
+	}
+}
+
+bool UFL_Render::LoadPixelsFromFile(UObject* WorldContextObject, const FString& FilePath, const bool bDeCompress,
+	TArray<FLinearColor>& OutLinearSamples)
+{
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	if (!PlatformFile.FileExists(*FilePath))
+	{
+		UE_LOG(LogTemp, Error, TEXT("File doesn't exist: %s"), *FilePath);
+		return false;
+	}
+
+	TArray<uint8> Data;
+	if (!FFileHelper::LoadFileToArray(Data, *FilePath))
+	{
+		UE_LOG(LogTemp, Error, TEXT("File can't be loaded: %s"), *FilePath);
+		return false;
+	}
+
+	if (Data.Num() == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Data did not load correctly from file: %s"), *FilePath);
+		return false;
+	}
+
+	if (bDeCompress)
+	{
+		FString FileName = FPaths::GetCleanFilename(FilePath);
+		FString BaseFileName, SizeString;
+		if (!FileName.Split(TEXT("-"), &BaseFileName, &SizeString, ESearchCase::IgnoreCase, ESearchDir::FromEnd))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to parse uncompressed size from file name: %s"), *FileName);
+			return false;
+		}
+
+		SizeString = FPaths::GetBaseFilename(SizeString);
+		int64 UnCompressedSize = FCString::Atoi64(*SizeString);
+
+		if (UnCompressedSize <= 0)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Invalid uncompressed size parsed from file name: %s"), *SizeString);
+			return false;
+		}
+		
+		TArray<uint8> DecompressedData;
+
+		DecompressedData.SetNumUninitialized(UnCompressedSize);
+
+		bool bSuccess = FOodleDataCompression::Decompress(
+		DecompressedData.GetData(),              
+		UnCompressedSize,                        
+		Data.GetData(),                
+		Data.NumBytes()
+		);
+
+		if (!bSuccess)
+		{
+			DecompressedData.Empty();
+			UE_LOG(LogTemp, Error, TEXT("Decompress failed."));
+			return false;
+		};
+
+		Data.Empty();
+		Data = DecompressedData;
+		DecompressedData.Empty();
+	}
+	
+	if (!DeserializeLinearColorArray(Data, OutLinearSamples))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to deserialize raw data."));
 		return false;
 	}
 	
+	UE_LOG(LogTemp, Log, TEXT("Successfully loaded and processed pixel data from file: %s"), *FilePath);
+	return true;
+}
+
+bool UFL_Render::DeserializeLinearColorArray(const TArray<uint8>& Data, TArray<FLinearColor>& OutLinearSamples)
+{
+	int64 NumColors = Data.Num() / sizeof(FLinearColor);
+
+	if (NumColors * sizeof(FLinearColor) != Data.Num())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Data size is not a multiple of FLinearColor size. Corrupted or invalid data."));
+		return false;
+	}
+
+	OutLinearSamples.SetNumUninitialized(NumColors);
+
+	FMemory::Memcpy(OutLinearSamples.GetData(), Data.GetData(), Data.Num());
+	return true;
 }
 
