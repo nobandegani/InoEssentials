@@ -307,7 +307,7 @@ bool UFL_Extra::CompressDataWithOodle(
 		CompressionLevel
 	);
 
-	UE_LOG(LogTemp, Log, TEXT("Compressed Size: %d"), CompressedSize);
+	UE_LOG(LogTemp, Log, TEXT("Compressed Size: %lld"), CompressedSize);
 	
 	if (CompressedSize > 0)
 	{
