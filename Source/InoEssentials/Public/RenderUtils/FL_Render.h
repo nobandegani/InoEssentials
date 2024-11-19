@@ -42,29 +42,55 @@ public:
 		static FLinearColor ReadRawPixelFromRenderTarget(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget, int32 X, int32 Y, bool bNormalize = true);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render", meta = (Keywords = "ReadRenderTarget", WorldContext = "WorldContextObject"))
-		static bool ReadRawPixelsFromRenderTarget(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget, TArray<FLinearColor>& OutLinearSamples, bool bNormalize = true);
-
-	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render", meta = (Keywords = "ReadRenderTarget", WorldContext = "WorldContextObject"))
-		static bool SavePixelsToFile(
+		static bool ReadRawPixelsFromRenderTarget(
 			UObject* WorldContextObject,
+			UTextureRenderTarget2D* TextureRenderTarget,
+			TArray<FLinearColor>& OutLinearSamples,
+			TArray<FColor>& OutSamples,
+			bool bNormalize = true);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render")
+		static bool SavePixelsToFile(
 			const TArray<FLinearColor>& InLinearSamples,
 			const FString& InFilePath,
 			const bool bOverride,
 			const bool bCompress,
 			EInoCompressor InCompressor,
 			EInoCompressionLevel InCompressionLevel,
+			EInoDataType DataType,
+			EInoChannelType ChannelType,
 			FString& OutFilePath);
 	
-
-	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render", meta = (Keywords = "ReadRenderTarget", WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render")
 		static bool LoadPixelsFromFile(
-			UObject* WorldContextObject,
 			const FString& FilePath,
 			const bool bDeCompress,
 			TArray<FLinearColor>& InLinearSamples);
 
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render", meta = (Keywords = "ReadRenderTarget", WorldContext = "WorldContextObject"))
+		static bool SavePixelsFromRenderTargetToFile(
+			UObject* WorldContextObject,
+			UTextureRenderTarget2D* TextureRenderTarget,
+			bool bNormalize,
+			const TArray<FLinearColor>& InLinearSamples,
+			const FString& InFilePath,
+			const bool bOverride,
+			const bool bCompress,
+			const EInoCompressor InCompressor,
+			const EInoCompressionLevel InCompressionLevel,
+			const EInoDataType DataType,
+			const EInoChannelType ChannelType,
+			FString& OutFilePath
+			);
+	
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render")
 		static bool DeserializeLinearColorArray(const TArray<uint8>& Data, TArray<FLinearColor>& OutLinearSamples);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render")
+		static TArray<FVector3f> ConvertLinearColorToVector3f(const TArray<FLinearColor>& InLinearSamples);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render")
+	static TArray<FVector> ConvertLinearColorToVector(const TArray<FLinearColor>& InLinearSamples);
 private:
 	
 };
