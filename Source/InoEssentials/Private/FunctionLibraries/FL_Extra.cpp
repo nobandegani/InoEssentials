@@ -268,9 +268,9 @@ FString UFL_Extra::DataToString(const TArray<uint8>& InputData)
 
 bool UFL_Extra::CompressDataWithOodle(
 	const TArray<uint8>& InDecompressedData,
-	EInoCompressor InCompressor,
-	EInoCompressionLevel InCompressionLevel,
-	int32& OutDeCompressedSize,
+	const EInoCompressor InCompressor,
+	const EInoCompressionLevel InCompressionLevel,
+	int64& OutDeCompressedSize,
 	TArray<uint8>& OutCompressedData
 	)
 {
@@ -287,9 +287,9 @@ bool UFL_Extra::CompressDataWithOodle(
 
 	UE_LOG(LogTemp, Log, TEXT("Compressor: %d, Compression Level: %d"), static_cast<int32>(OodleCompressor), static_cast<int32>(CompressionLevel));
 
-	int64 DeCompressedSize = InDecompressedData.NumBytes();
+	OutDeCompressedSize = InDecompressedData.NumBytes();
 	
-	int64 MaxCompressedSize = FOodleDataCompression::CompressedBufferSizeNeeded(DeCompressedSize);
+	int64 MaxCompressedSize = FOodleDataCompression::CompressedBufferSizeNeeded(OutDeCompressedSize);
 
 	if (MaxCompressedSize <= 0)
 	{
@@ -299,13 +299,13 @@ bool UFL_Extra::CompressDataWithOodle(
 	
 	OutCompressedData.SetNumUninitialized(MaxCompressedSize);
 
-	UE_LOG(LogTemp, Log, TEXT("Uncompressed size: %lld bytes, Max compressed size: %lld bytes"), DeCompressedSize, MaxCompressedSize);
+	UE_LOG(LogTemp, Log, TEXT("Uncompressed size: %lld bytes, Max compressed size: %lld bytes"), OutDeCompressedSize, MaxCompressedSize);
 	
 	int64 CompressedSize = FOodleDataCompression::Compress(
 		OutCompressedData.GetData(),
 		MaxCompressedSize,
 		InDecompressedData.GetData(),
-		DeCompressedSize,
+		OutDeCompressedSize,
 		OodleCompressor,
 		CompressionLevel
 	);
@@ -315,7 +315,6 @@ bool UFL_Extra::CompressDataWithOodle(
 	if (CompressedSize > 0)
 	{
 		OutCompressedData.SetNum(CompressedSize);
-		OutDeCompressedSize = static_cast<int32>(DeCompressedSize);
 		UE_LOG(LogTemp, Log, TEXT("Compression successful!"));
 		return true;
 	}
@@ -325,7 +324,7 @@ bool UFL_Extra::CompressDataWithOodle(
 	return false;
 }
 
-bool UFL_Extra::DecompressDataWithOodle(const TArray<uint8>& InCompressedData, const int32& InDeCompressedSize,
+bool UFL_Extra::DecompressDataWithOodle(const TArray<uint8>& InCompressedData, const int64& InDeCompressedSize,
 	TArray<uint8>& OutDecompressedData)
 {
 	if (InCompressedData.Num() == 0 || InDeCompressedSize <= 0)

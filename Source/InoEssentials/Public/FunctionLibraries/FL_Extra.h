@@ -69,15 +69,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
 		static bool CompressDataWithOodle(
 			const TArray<uint8>& InDecompressedData,
-			EInoCompressor InCompressor,
-			EInoCompressionLevel InCompressionLevel,
-			int32& OutDeCompressedSize,
+			const EInoCompressor InCompressor,
+			const EInoCompressionLevel InCompressionLevel,
+			int64& OutDeCompressedSize,
 			TArray<uint8>& OutCompressedData
 			);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Extra")
 		static bool DecompressDataWithOodle(
 			const TArray<uint8>& InCompressedData,
-			const int32& InDeCompressedSize,
+			const int64& InDeCompressedSize,
 			TArray<uint8>& OutDecompressedData);
 };
