@@ -45,8 +45,7 @@ public:
 		static bool ReadRawPixelsFromRenderTarget(
 			UObject* WorldContextObject,
 			UTextureRenderTarget2D* TextureRenderTarget,
-			TArray<FLinearColor>& OutLinearSamples,
-			TArray<FColor>& OutSamples,
+			TArray<FLinearColor>& OutSamples,
 			bool bNormalize = true);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render")
@@ -68,17 +67,15 @@ public:
 			TArray<FLinearColor>& InLinearSamples);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render", meta = (Keywords = "ReadRenderTarget", WorldContext = "WorldContextObject"))
-		static bool SavePixelsFromRenderTargetToFile(
+		static bool SaveRenderTargetToFileAsData(
 			UObject* WorldContextObject,
 			UTextureRenderTarget2D* TextureRenderTarget,
 			bool bNormalize,
-			const TArray<FLinearColor>& InLinearSamples,
 			const FString& InFilePath,
 			const bool bOverride,
 			const bool bCompress,
 			const EInoCompressor InCompressor,
 			const EInoCompressionLevel InCompressionLevel,
-			const EInoDataType DataType,
 			const EInoChannelType ChannelType,
 			FString& OutFilePath
 			);
@@ -90,7 +87,14 @@ public:
 		static TArray<FVector3f> ConvertLinearColorToVector3f(const TArray<FLinearColor>& InLinearSamples);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render")
-	static TArray<FVector> ConvertLinearColorToVector(const TArray<FLinearColor>& InLinearSamples);
-private:
+		static TArray<FVector> ConvertLinearColorToVector(const TArray<FLinearColor>& InLinearSamples);
 	
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render")
+		static FString FileExtenstionByDataType(const EInoDataType DataType, const EInoChannelType ChannelType);
+
+	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render")
+	static FString FileExtenstionByPixelFormat(const EPixelFormat PixelFormat, const EInoChannelType ChannelType);
+
+private:
+	static TArray<FFloat16Color> ConvertLinearColorToFloat16Color(const TArray<FLinearColor>& InLinearSamples);
 };

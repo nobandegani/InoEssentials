@@ -196,9 +196,17 @@ FVector UFL_Render::GetWorldPositionFromRenderTarget(UTextureRenderTarget2D* Ren
 	return FVector::ZeroVector;
 }
 
-EPixelFormat InoReadRenderTargetHelper(TArray<FColor>& OutLDRValues, TArray<FLinearColor>& OutHDRValues,
-	UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget, int32 X, int32 Y, int32 Width,
-	int32 Height, bool bNormalize)
+EPixelFormat InoReadRenderTargetHelper(
+	TArray<FColor>& Out8Bit,
+	TArray<FFloat16Color>& Out16Bit,
+	TArray<FLinearColor>& Out32Bit,
+	UObject* WorldContextObject,
+	UTextureRenderTarget2D* TextureRenderTarget,
+	int32 X,
+	int32 Y,
+	int32 Width,
+	int32 Height,
+	bool bNormalize)
 {
 	EPixelFormat OutFormat = PF_Unknown;
 
@@ -232,33 +240,33 @@ EPixelFormat InoReadRenderTargetHelper(TArray<FColor>& OutLDRValues, TArray<FLin
 	switch (OutFormat)
 	{
 	case PF_B8G8R8A8:
-		if (!RenderTarget->ReadPixels(OutLDRValues, ReadSurfaceDataFlags, SampleRect))
+		if (!RenderTarget->ReadPixels(Out8Bit, ReadSurfaceDataFlags, SampleRect))
 		{
 			OutFormat = PF_Unknown;
 		}
 		else
 		{
-			check(OutLDRValues.Num() == NumPixelsToRead);
+			check(Out8Bit.Num() == NumPixelsToRead);
 		}
 		break;
 	case PF_FloatRGBA:
-		if (!RenderTarget->ReadLinearColorPixels(OutHDRValues, ReadSurfaceDataFlags, SampleRect))
+		if (!RenderTarget->ReadFloat16Pixels(Out16Bit, ReadSurfaceDataFlags, SampleRect))
 		{
 			OutFormat = PF_Unknown;
 		}
 		else
 		{
-			check(OutHDRValues.Num() == NumPixelsToRead);
+			check(Out16Bit.Num() == NumPixelsToRead);
 		}
 		break;
 	case PF_A32B32G32R32F:
-		if (!RenderTarget->ReadLinearColorPixels(OutHDRValues, ReadSurfaceDataFlags, SampleRect))
+		if (!RenderTarget->ReadLinearColorPixels(Out32Bit, ReadSurfaceDataFlags, SampleRect))
 		{
 			OutFormat = PF_Unknown;
 		}
 		else
 		{
-			check(OutHDRValues.Num() == NumPixelsToRead);
+			check(Out32Bit.Num() == NumPixelsToRead);
 		}
 		break;
 	default:
@@ -271,20 +279,21 @@ EPixelFormat InoReadRenderTargetHelper(TArray<FColor>& OutLDRValues, TArray<FLin
 
 FLinearColor UFL_Render::ReadRawPixelFromRenderTarget(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget, int32 X, int32 Y, bool bNormalize)
 {
-	TArray<FColor> Samples;
-	TArray<FLinearColor> LinearSamples;
+	TArray<FColor> Samples8Bit;;
+	TArray<FFloat16Color> Samples16Bit;
+	TArray<FLinearColor> Samples32Bit;
 
-	switch (InoReadRenderTargetHelper(Samples, LinearSamples, WorldContextObject, TextureRenderTarget, X, Y, 1, 1, bNormalize))
+	switch (InoReadRenderTargetHelper(Samples8Bit, Samples16Bit, Samples32Bit, WorldContextObject, TextureRenderTarget, X, Y, 1, 1, bNormalize))
 	{
 	case PF_B8G8R8A8:
-		check(Samples.Num() == 1 && LinearSamples.Num() == 0);
-		return FLinearColor(float(Samples[0].R), float(Samples[0].G), float(Samples[0].B), float(Samples[0].A));
+		check(Samples8Bit.Num() == 1 && Samples16Bit.Num() == 0 && Samples32Bit.Num() == 0);
+		return FLinearColor(float(Samples8Bit[0].R), float(Samples8Bit[0].G), float(Samples8Bit[0].B), float(Samples8Bit[0].A));
 	case PF_FloatRGBA:
-		check(Samples.Num() == 0 && LinearSamples.Num() == 1);
-		return LinearSamples[0];
+		check(Samples8Bit.Num() == 0 && Samples16Bit.Num() == 1 && Samples32Bit.Num() == 0);
+		return FLinearColor(float(Samples16Bit[0].R), float(Samples16Bit[0].G), float(Samples16Bit[0].B), float(Samples16Bit[0].A));
 	case PF_A32B32G32R32F:
-		check(Samples.Num() == 0 && LinearSamples.Num() == 1);
-		return LinearSamples[0];
+		check(Samples8Bit.Num() == 0 && Samples16Bit.Num() == 0 && Samples32Bit.Num() == 1);
+		return Samples32Bit[0];
 	case PF_Unknown:
 	default:
 		return FLinearColor::Red;
@@ -294,33 +303,45 @@ FLinearColor UFL_Render::ReadRawPixelFromRenderTarget(UObject* WorldContextObjec
 bool UFL_Render::ReadRawPixelsFromRenderTarget(
 	UObject* WorldContextObject,
 	UTextureRenderTarget2D* TextureRenderTarget,
-	TArray<FLinearColor>& OutLinearSamples,
-	TArray<FColor>& OutSamples,
+	TArray<FLinearColor>& OutSamples,
 	bool bNormalize)
 {
 	if (WorldContextObject != nullptr && TextureRenderTarget != nullptr)
 	{
 		const int32 NumSamples = TextureRenderTarget->SizeX * TextureRenderTarget->SizeY;
 
-		OutLinearSamples.Reset(NumSamples);
-
-		switch (InoReadRenderTargetHelper(OutSamples, OutLinearSamples, WorldContextObject, TextureRenderTarget, 0, 0, TextureRenderTarget->SizeX, TextureRenderTarget->SizeY, bNormalize))
+		OutSamples.Reset(NumSamples);
+		
+		TArray<FColor> Out8BitSamples;
+		TArray<FFloat16Color> Out16BitSamples;
+		Out8BitSamples.Reserve(NumSamples);
+		Out16BitSamples.Reserve(NumSamples);
+		
+		switch (InoReadRenderTargetHelper(Out8BitSamples, Out16BitSamples, OutSamples, WorldContextObject, TextureRenderTarget, 0, 0, TextureRenderTarget->SizeX, TextureRenderTarget->SizeY, bNormalize))
 		{
 		case PF_B8G8R8A8:
-			check(OutSamples.Num() == NumSamples && OutLinearSamples.Num() == 0);
+			check(Out8BitSamples.Num() == NumSamples && Out16BitSamples.Num() == 0 && OutSamples.Num() == 0);
+			for (int32 SampleIndex = 0; SampleIndex < NumSamples; ++SampleIndex)
+			{
+				Out8BitSamples.Add(Out8BitSamples[SampleIndex]);
+			}
 			return true;
 		case PF_FloatRGBA:
-			check(OutSamples.Num() == 0 && OutLinearSamples.Num() == NumSamples);
+			check(Out8BitSamples.Num() == 0 && Out16BitSamples.Num() == NumSamples && OutSamples.Num() == 0);
+			for (int32 SampleIndex = 0; SampleIndex < NumSamples; ++SampleIndex)
+			{
+				Out16BitSamples.Add(Out16BitSamples[SampleIndex]);
+			}
 			return true;
 		case PF_A32B32G32R32F:
-			check(OutSamples.Num() == 0 && OutLinearSamples.Num() == NumSamples);
+			check(Out8BitSamples.Num() == 0 && Out16BitSamples.Num() == 0 && OutSamples.Num() == NumSamples);
 			return true;
 		case PF_Unknown:
 		default:
 			return false;
 		}
 	}
-
+	
 	return false;
 }
 
@@ -363,9 +384,42 @@ bool UFL_Render::SavePixelsToFile(
 	switch (DataType)
 	{
 	case EInoDataType::Bit8:
-		if (ChannelType == EInoChannelType::R || ChannelType == EInoChannelType::G || ChannelType == EInoChannelType::B || ChannelType == EInoChannelType::A)
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::GB || ChannelType == EInoChannelType::RA || ChannelType == EInoChannelType::GA || ChannelType == EInoChannelType::BA)
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}else
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}
 			break;
 	case EInoDataType::Bit16:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			TArray<FFloat16Color> TempArray = ConvertLinearColorToFloat16Color(InLinearSamples);
+			InputData.Append(reinterpret_cast<const uint8*>(TempArray.GetData()), TempArray.NumBytes());
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::GB || ChannelType == EInoChannelType::RA || ChannelType == EInoChannelType::GA || ChannelType == EInoChannelType::BA)
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}else
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}
 		break;
 	case EInoDataType::Bit32:
 		if (ChannelType == EInoChannelType::RGBA)
@@ -375,12 +429,22 @@ bool UFL_Render::SavePixelsToFile(
 		{
 			TArray<FVector3f> TempArray = ConvertLinearColorToVector3f(InLinearSamples);
 			InputData.Append(reinterpret_cast<const uint8*>(TempArray.GetData()), TempArray.NumBytes());
+		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::GB || ChannelType == EInoChannelType::RA || ChannelType == EInoChannelType::GA || ChannelType == EInoChannelType::BA)
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}else
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
 		}
 		break;
 	case EInoDataType::Bit64:
-		break;
+		UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+		return false;
 	default:
-		break;
+		UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+		return false;
 	}
 
 	
@@ -391,36 +455,8 @@ bool UFL_Render::SavePixelsToFile(
 
 	if (bCompress)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Start compressing data"));
-		
-		FOodleDataCompression::ECompressor OodleCompressor = static_cast<FOodleDataCompression::ECompressor>(static_cast<int32>(InCompressor));
-		FOodleDataCompression::ECompressionLevel CompressionLevel = static_cast<FOodleDataCompression::ECompressionLevel>((static_cast<int32>(InCompressionLevel) -4));
-		UE_LOG(LogTemp, Log, TEXT("Compressor: %d, Compression Level: %d"), static_cast<int32>(OodleCompressor), static_cast<int32>(CompressionLevel));
-
-		int64 MaxCompressedSize = FOodleDataCompression::CompressedBufferSizeNeeded(UnCompressedSize);
-		
-		OutputData.SetNumUninitialized(MaxCompressedSize);
-
-		UE_LOG(LogTemp, Log, TEXT("Uncompressed size: %lld bytes, Max compressed size: %lld bytes"), UnCompressedSize, MaxCompressedSize);
-		
-		int64 CompressedSize = FOodleDataCompression::Compress(
-					OutputData.GetData(),
-					MaxCompressedSize,
-					InputData.GetData(),
-					UnCompressedSize,
-					OodleCompressor,
-					CompressionLevel
-					);
-		
-		if (CompressedSize > 0)
-		{
-			OutputData.SetNum(CompressedSize);
-			UE_LOG(LogTemp, Log, TEXT("Compression successful! Compressed size: %lld bytes"), CompressedSize);
-		}else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Compression failed! CompressedSize returned as 0 or less."));
-			return false;
-		}
+		int64 DeCompressedSize;
+		UFL_Extra::CompressDataWithOodle(InputData, InCompressor, InCompressionLevel, DeCompressedSize, OutputData);
 	}else
 	{
 		UE_LOG(LogTemp, Log, TEXT("Skipping compression, saving raw data."));
@@ -429,36 +465,8 @@ bool UFL_Render::SavePixelsToFile(
 	
 	UE_LOG(LogTemp, Log, TEXT("start saving file"));
 
-	FString DataTypeExten;
-	switch (DataType)
-	{
-	case EInoDataType::Bit8:
-		if (ChannelType == EInoChannelType::R || ChannelType == EInoChannelType::G || ChannelType == EInoChannelType::B || ChannelType == EInoChannelType::A)
-			break;
-	case EInoDataType::Bit16:
-		break;
-	case EInoDataType::Bit32:
-		if (ChannelType == EInoChannelType::RGBA)
-		{
-			DataTypeExten = "4f32b";
-		}else if (ChannelType == EInoChannelType::RGB)
-		{
-			DataTypeExten = "3f32b";
-		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::RA)
-		{
-			DataTypeExten = "2f32b";
-		}
-		break;
-	case EInoDataType::Bit64:
-		UE_LOG(LogTemp, Error, TEXT("unsupported data type"));
-		return false;
-	default:
-		UE_LOG(LogTemp, Error, TEXT("unsupported data type"));
-		return false;
-	}
-
 	FString CompressExten = bCompress ? "-C" : "-U";
-	OutFilePath = InFilePath + CompressExten + FString::Printf(TEXT("-%lld"), UnCompressedSize) + TEXT(".InoR") + DataTypeExten;
+	OutFilePath = InFilePath + CompressExten + FString::Printf(TEXT("-%lld"), UnCompressedSize) + TEXT(".InoR") + FileExtenstionByDataType(DataType, ChannelType);
 	if (PlatformFile.FileExists(*OutFilePath) && !bOverride)
 	{
 		UE_LOG(LogTemp, Error, TEXT("File already exists and override is not allowed."));
@@ -513,32 +521,20 @@ bool UFL_Render::LoadPixelsFromFile(
 		}
 
 		SizeString = FPaths::GetBaseFilename(SizeString);
-		int64 UnCompressedSize = FCString::Atoi64(*SizeString);
+		int32 DeCompressedSize = FCString::Atoi64(*SizeString);
 
-		if (UnCompressedSize <= 0)
+		if (DeCompressedSize <= 0)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Invalid uncompressed size parsed from file name: %s"), *SizeString);
 			return false;
 		}
-		
 		TArray<uint8> DecompressedData;
-
-		DecompressedData.SetNumUninitialized(UnCompressedSize);
-
-		bool bSuccess = FOodleDataCompression::Decompress(
-		DecompressedData.GetData(),              
-		UnCompressedSize,                        
-		Data.GetData(),                
-		Data.NumBytes()
-		);
-
-		if (!bSuccess)
+		if (!UFL_Extra::DecompressDataWithOodle(Data, DeCompressedSize, DecompressedData))
 		{
-			DecompressedData.Empty();
 			UE_LOG(LogTemp, Error, TEXT("Decompress failed."));
 			return false;
-		};
-
+		}
+		
 		Data.Empty();
 		Data = DecompressedData;
 		DecompressedData.Empty();
@@ -554,13 +550,155 @@ bool UFL_Render::LoadPixelsFromFile(
 	return true;
 }
 
-bool UFL_Render::SavePixelsFromRenderTargetToFile(UObject* WorldContextObject,
-	UTextureRenderTarget2D* TextureRenderTarget, bool bNormalize, const TArray<FLinearColor>& InLinearSamples,
-	const FString& InFilePath, const bool bOverride, const bool bCompress, const EInoCompressor InCompressor,
-	const EInoCompressionLevel InCompressionLevel, const EInoDataType DataType, const EInoChannelType ChannelType,
+bool UFL_Render::SaveRenderTargetToFileAsData(
+	UObject* WorldContextObject,
+	UTextureRenderTarget2D* TextureRenderTarget,
+	bool bNormalize,
+	const FString& InFilePath,
+	const bool bOverride,
+	const bool bCompress,
+	const EInoCompressor InCompressor,
+	const EInoCompressionLevel InCompressionLevel,
+	const EInoChannelType ChannelType,
 	FString& OutFilePath)
 {
-	return false;
+	if (WorldContextObject == nullptr || TextureRenderTarget == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Render context is null."));
+		return false;
+	}
+
+	if (InFilePath.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to save: FilePath is empty."));
+		return false;
+	}
+	
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	FString Directory = FPaths::GetPath(OutFilePath);
+	if (!PlatformFile.DirectoryExists(*Directory))
+	{
+		if (!PlatformFile.CreateDirectory(*Directory))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Directory doesn't exist and couldn't be created: %s"), *Directory);
+			return false;
+		}
+	}
+	
+	const int32 NumSamples = TextureRenderTarget->SizeX * TextureRenderTarget->SizeY;
+	
+	TArray<FColor> Out8BitSamples;
+	TArray<FFloat16Color> Out16BitSamples;
+	TArray<FLinearColor> Out32BitSamples;
+	Out8BitSamples.Reserve(NumSamples);
+	Out16BitSamples.Reserve(NumSamples);
+	Out32BitSamples.Reserve(NumSamples);
+
+	EPixelFormat RTPixelFormat = InoReadRenderTargetHelper(Out8BitSamples, Out16BitSamples, Out32BitSamples, WorldContextObject, TextureRenderTarget, 0, 0, TextureRenderTarget->SizeX, TextureRenderTarget->SizeY, bNormalize);
+	
+	switch (RTPixelFormat)
+	{
+	case PF_B8G8R8A8:
+		check(Out8BitSamples.Num() == NumSamples && Out16BitSamples.Num() == 0 && Out32BitSamples.Num() == 0);
+		break;
+	case PF_FloatRGBA:
+		check(Out8BitSamples.Num() == 0 && Out16BitSamples.Num() == NumSamples && Out32BitSamples.Num() == 0);
+		break;
+	case PF_A32B32G32R32F:
+		check(Out8BitSamples.Num() == 0 && Out16BitSamples.Num() == 0 && Out32BitSamples.Num() == NumSamples);
+		break;
+	case PF_Unknown:
+		UE_LOG(LogTemp, Error, TEXT("Failed to save: unknown pixel format"));
+		return false;
+	default:
+		UE_LOG(LogTemp, Error, TEXT("Failed to save: unknown pixel format"));
+		return false;
+	}
+
+	TArray<uint8> InputData;
+
+	switch (RTPixelFormat)
+	{
+	case PF_B8G8R8A8:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			InputData.Append(reinterpret_cast<const uint8*>(Out8BitSamples.GetData()), Out8BitSamples.NumBytes());
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}else
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}
+			break;
+	case PF_FloatRGBA:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			InputData.Append(reinterpret_cast<const uint8*>(Out16BitSamples.GetData()), Out16BitSamples.NumBytes());
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}else
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}
+		break;
+	case PF_A32B32G32R32F:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			InputData.Append(reinterpret_cast<const uint8*>(Out32BitSamples.GetData()), Out32BitSamples.NumBytes());
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			TArray<FVector3f> TempArray = ConvertLinearColorToVector3f(Out32BitSamples);
+			InputData.Append(reinterpret_cast<const uint8*>(TempArray.GetData()), TempArray.NumBytes());
+		}else
+		{
+			UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+			return false;
+		}
+		break;
+	default:
+		UE_LOG(LogTemp, Log, TEXT("not supported data type"));
+		return false;
+	}
+	
+	TArray<uint8> OutputData;
+	
+	int64 UnCompressedSize = InputData.NumBytes();
+
+	if (bCompress)
+	{
+		UFL_Extra::CompressDataWithOodle(InputData, InCompressor, InCompressionLevel, UnCompressedSize, OutputData);
+	}else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Skipping compression, saving raw data."));
+		OutputData = InputData;
+	}
+	
+	UE_LOG(LogTemp, Log, TEXT("start saving file"));
+
+	FString CompressExten = bCompress ? "-C" : "-U";
+	OutFilePath = InFilePath + CompressExten + FString::Printf(TEXT("-%lld"), UnCompressedSize) + TEXT(".InoR") + FileExtenstionByPixelFormat(RTPixelFormat, ChannelType);
+	if (PlatformFile.FileExists(*OutFilePath) && !bOverride)
+	{
+		UE_LOG(LogTemp, Error, TEXT("File already exists and override is not allowed."));
+		return false;
+	}
+
+	if (FFileHelper::SaveArrayToFile(OutputData, *OutFilePath))
+	{
+		UE_LOG(LogTemp, Log, TEXT("File saved successfully: %s"), *OutFilePath);
+		return true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to save file: %s"), *OutFilePath);
+		return false;
+	}
 }
 
 bool UFL_Render::DeserializeLinearColorArray(const TArray<uint8>& Data, TArray<FLinearColor>& OutLinearSamples)
@@ -607,3 +745,149 @@ TArray<FVector> UFL_Render::ConvertLinearColorToVector(const TArray<FLinearColor
 	return OutVectorSamples;
 }
 
+FString UFL_Render::FileExtenstionByDataType(const EInoDataType DataType, const EInoChannelType ChannelType)
+{
+	FString DataTypeExten;
+	switch (DataType)
+	{
+	case EInoDataType::Bit8:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			DataTypeExten = "4f08b";
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			DataTypeExten = "3f08b";
+		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::GB || ChannelType == EInoChannelType::RA || ChannelType == EInoChannelType::GA || ChannelType == EInoChannelType::BA)
+		{
+			DataTypeExten = "2f08b";
+		}else
+		{
+			DataTypeExten = "1f08b";
+		}
+		break;
+	case EInoDataType::Bit16:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			DataTypeExten = "4f16b";
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			DataTypeExten = "3f16b";
+		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::GB || ChannelType == EInoChannelType::RA || ChannelType == EInoChannelType::GA || ChannelType == EInoChannelType::BA)
+		{
+			DataTypeExten = "2f16b";
+		}else
+		{
+			DataTypeExten = "1f16b";
+		}
+		break;
+	case EInoDataType::Bit32:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			DataTypeExten = "4f32b";
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			DataTypeExten = "3f32b";
+		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::GB || ChannelType == EInoChannelType::RA || ChannelType == EInoChannelType::GA || ChannelType == EInoChannelType::BA)
+		{
+			DataTypeExten = "2f32b";
+		}else
+		{
+			DataTypeExten = "1f32b";
+		}
+		break;
+	case EInoDataType::Bit64:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			DataTypeExten = "4f64b";
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			DataTypeExten = "3f64b";
+		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::GB || ChannelType == EInoChannelType::RA || ChannelType == EInoChannelType::GA || ChannelType == EInoChannelType::BA)
+		{
+			DataTypeExten = "2f64b";
+		}else
+		{
+			DataTypeExten = "1f64b";
+		}
+		break;
+	default:
+		UE_LOG(LogTemp, Error, TEXT("unsupported data type"));
+		DataTypeExten = "unkown";
+		break;
+	}
+	
+	return DataTypeExten;
+}
+
+FString UFL_Render::FileExtenstionByPixelFormat(const EPixelFormat PixelFormat, const EInoChannelType ChannelType)
+{
+	FString DataTypeExten;
+	switch (PixelFormat)
+	{
+	case PF_B8G8R8A8:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			DataTypeExten = "4f08b";
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			DataTypeExten = "3f08b";
+		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::GB || ChannelType == EInoChannelType::RA || ChannelType == EInoChannelType::GA || ChannelType == EInoChannelType::BA)
+		{
+			DataTypeExten = "2f08b";
+		}else
+		{
+			DataTypeExten = "1f08b";
+		}
+		break;
+	case PF_FloatRGBA:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			DataTypeExten = "4f16b";
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			DataTypeExten = "3f16b";
+		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::GB || ChannelType == EInoChannelType::RA || ChannelType == EInoChannelType::GA || ChannelType == EInoChannelType::BA)
+		{
+			DataTypeExten = "2f16b";
+		}else
+		{
+			DataTypeExten = "1f16b";
+		}
+		break;
+	case PF_A32B32G32R32F:
+		if (ChannelType == EInoChannelType::RGBA)
+		{
+			DataTypeExten = "4f32b";
+		}else if (ChannelType == EInoChannelType::RGB)
+		{
+			DataTypeExten = "3f32b";
+		}else if (ChannelType == EInoChannelType::RG || ChannelType == EInoChannelType::RB || ChannelType == EInoChannelType::GB || ChannelType == EInoChannelType::RA || ChannelType == EInoChannelType::GA || ChannelType == EInoChannelType::BA)
+		{
+			DataTypeExten = "2f32b";
+		}else
+		{
+			DataTypeExten = "1f32b";
+		}
+		break;
+	default:
+		UE_LOG(LogTemp, Error, TEXT("unsupported data type"));
+		DataTypeExten = "unkown";
+		break;
+	}
+	
+	return DataTypeExten;
+}
+
+TArray<FFloat16Color> UFL_Render::ConvertLinearColorToFloat16Color(const TArray<FLinearColor>& InLinearSamples)
+{
+	TArray<FFloat16Color> OutFloat16ColorSamples;
+	OutFloat16ColorSamples.Reserve(InLinearSamples.Num());
+
+	for (const FLinearColor& Color : InLinearSamples)
+	{
+		FFloat16Color Float16ColorSample(Color);
+		OutFloat16ColorSamples.Add(Float16ColorSample);
+	}
+
+	return OutFloat16ColorSamples;
+}
