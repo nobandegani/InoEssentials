@@ -277,23 +277,33 @@ EPixelFormat InoReadRenderTargetHelper(
 	return OutFormat;
 }
 
-FLinearColor UFL_Render::ReadRawPixelFromRenderTarget(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget, int32 X, int32 Y, bool bNormalize)
+FLinearColor UFL_Render::ReadRawPixelFromRenderTarget(
+	UObject* WorldContextObject,
+	UTextureRenderTarget2D* TextureRenderTarget,
+	int32 X,
+	int32 Y,
+	bool bNormalize,
+	float MapValue)
 {
 	TArray<FColor> Samples8Bit;;
 	TArray<FFloat16Color> Samples16Bit;
 	TArray<FLinearColor> Samples32Bit;
-
+	FLinearColor TempColor;
+	FLinearColor TempMapValue(MapValue,MapValue,MapValue,MapValue);
+	
 	switch (InoReadRenderTargetHelper(Samples8Bit, Samples16Bit, Samples32Bit, WorldContextObject, TextureRenderTarget, X, Y, 1, 1, bNormalize))
 	{
 	case PF_B8G8R8A8:
 		check(Samples8Bit.Num() == 1 && Samples16Bit.Num() == 0 && Samples32Bit.Num() == 0);
-		return FLinearColor(float(Samples8Bit[0].R), float(Samples8Bit[0].G), float(Samples8Bit[0].B), float(Samples8Bit[0].A));
+		TempColor = FLinearColor(static_cast<float>(Samples8Bit[0].R), static_cast<float>(Samples8Bit[0].G), static_cast<float>(Samples8Bit[0].B), static_cast<float>(Samples8Bit[0].A)) ;
+		return MapValue == 0.0f ? TempColor : (TempColor - TempMapValue);
 	case PF_FloatRGBA:
 		check(Samples8Bit.Num() == 0 && Samples16Bit.Num() == 1 && Samples32Bit.Num() == 0);
-		return FLinearColor(float(Samples16Bit[0].R), float(Samples16Bit[0].G), float(Samples16Bit[0].B), float(Samples16Bit[0].A));
+		TempColor = FLinearColor(static_cast<float>(Samples16Bit[0].R), static_cast<float>(Samples16Bit[0].G), static_cast<float>(Samples16Bit[0].B), static_cast<float>(Samples16Bit[0].A));
+		return MapValue == 0.0f ? TempColor : (TempColor - TempMapValue);
 	case PF_A32B32G32R32F:
 		check(Samples8Bit.Num() == 0 && Samples16Bit.Num() == 0 && Samples32Bit.Num() == 1);
-		return Samples32Bit[0];
+		return MapValue == 0.0f ? Samples32Bit[0] : (Samples32Bit[0] - TempMapValue);
 	case PF_Unknown:
 	default:
 		return FLinearColor::Red;

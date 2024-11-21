@@ -39,7 +39,13 @@ public:
 		static FVector GetWorldPositionFromRenderTarget(UTextureRenderTarget2D* RenderTarget, int32 X, int32 Y);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render", meta = (Keywords = "ReadRenderTarget", WorldContext = "WorldContextObject"))
-		static FLinearColor ReadRawPixelFromRenderTarget(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget, int32 X, int32 Y, bool bNormalize = true);
+		static FLinearColor ReadRawPixelFromRenderTarget(
+			UObject* WorldContextObject,
+			UTextureRenderTarget2D* TextureRenderTarget,
+			int32 X,
+			int32 Y,
+			bool bNormalize,
+			float MapValue);
 
 	UFUNCTION(BlueprintCallable, Category = "Ino|FL|Render", meta = (Keywords = "ReadRenderTarget", WorldContext = "WorldContextObject"))
 		static bool ReadRawPixelsFromRenderTarget(
