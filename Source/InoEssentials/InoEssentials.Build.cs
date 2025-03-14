@@ -22,7 +22,8 @@ public class InoEssentials : ModuleRules
 				"Sockets",
 				"OodleDataCompression",
 				"RHI",      
-				"RenderCore"
+				"RenderCore",
+				"HTTP"
 			}
 			);
 		
