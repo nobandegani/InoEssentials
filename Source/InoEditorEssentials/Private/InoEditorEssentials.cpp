@@ -17,4 +17,4 @@ void FInoEditorEssentialsModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FInoEditorEssentialsModule, InoEssentials)
+IMPLEMENT_MODULE(FInoEditorEssentialsModule, InoEditorEssentials)
